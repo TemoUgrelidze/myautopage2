@@ -1,0 +1,237 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Page Background */
+body {
+    background-color: #F4F5F7;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+/* Sidebar Container */
+.box-side {
+    width: 280px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    position: absolute;
+    top: 50px;
+    left: 100px;
+    transition: all 0.3s ease-in-out;
+}
+
+.box-side:hover {
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Car Selector (Tabs) */
+.car-selector {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f0f0f5;
+}
+
+.car-selector button {
+    flex: 1;
+    border: none;
+    background: #f0f0f5;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.car-selector button:hover,
+.car-selector button:focus {
+    background: white;
+    color: #FF5400;
+}
+
+/* Form Properties */
+.properties {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.properties label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 5px;
+}
+
+.properties select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #555;
+    background: white;
+    transition: all 0.3s ease-in-out;
+}
+
+.properties select:focus {
+    border-color: #FF5400;
+    outline: none;
+}
+
+/* Search Button */
+.search-btn {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.search-btn button {
+    width: 100%;
+    background: #FF5400;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.search-btn button:hover {
+    background: #E64900;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Grid Layout */
+.grid {
+    padding-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 650px;
+}
+
+/* Card */
+.car-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.car-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Car Image */
+.car-image-container {
+    flex-shrink: 0;
+    width: 180px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.car-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+.car-image:hover {
+    transform: scale(1.1);
+}
+
+/* Car Info */
+.car-info {
+    margin-left: 15px;
+    flex-grow: 1;
+}
+
+.car-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.car-year {
+    color: #777;
+    font-size: 16px;
+}
+
+.car-details {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Car Price */
+.car-price-section {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.car-price {
+    color: #e63946;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.car-price-usd {
+    color: #555;
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .box-side {
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .grid {
+        max-width: 90%;
+    }
+
+    .car-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .car-image-container {
+        width: 100%;
+        height: auto;
+    }
+
+    .car-image {
+        width: 100%;
+        height: 180px;
+    }
+
+    .car-info {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
