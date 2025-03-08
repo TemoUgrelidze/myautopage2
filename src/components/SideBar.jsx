@@ -1,26 +1,26 @@
 import React from "react";
-import Filters from "./Filters"; // Filters component will handle the actual filters
+import Filters from "./Filters"; // Filters კომპონენტი მართავს ფილტრებს
 
 function SideBar({ setVehicleType, ...filterProps }) {
     return (
         <div className="box-side">
-            {/* Select Vehicle Type */}
+            {/* აირჩიეთ მანქანის ტიპი */}
             <div className="car-selector">
                 <button className="car" onClick={() => setVehicleType("car")}>
-                    <img src="\src\photos\car.svg" alt="Car" />
+                    <img src="/src/photos/car.svg" alt="მანქანა" />
                 </button>
                 <button className="tractor" onClick={() => setVehicleType("tractor")}>
-                    <img src="\src\photos\tractor.png" alt="Tractor" />
+                    <img src="/src/photos/tractor.png" alt="ტრაქტორი" />
                 </button>
                 <button className="bike" onClick={() => setVehicleType("moto")}>
-                    <img src="\src\photos\moto.svg" alt="Motorcycle" />
+                    <img src="/src/photos/moto.svg" alt="მოტოციკლი" />
                 </button>
             </div>
 
-            {/* Filters Component */}
+            {/* ფილტრები კომპონენტი */}
             <Filters {...filterProps} />
 
-            {/* Search Button */}
+            {/* ძებნის ღილაკი */}
             <div className="search-btn">
                 <button>ძებნა</button>
             </div>

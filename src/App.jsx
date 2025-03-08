@@ -61,7 +61,7 @@ function App() {
                 selectedModel={selectedModel}
                 setSelectedModel={setSelectedModel}
             />
-            <Main />
+            <Main selectedManufacturer={selectedManufacturer} selectedModel={selectedModel} />
         </div>
     );
 }
