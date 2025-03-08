@@ -1,10 +1,10 @@
+// SideBar.jsx
 import React from "react";
-import Filters from "./Filters"; // Filters კომპონენტი მართავს ფილტრებს
+import Filters from "./Filters";
 
-function SideBar({ setVehicleType, ...filterProps }) {
+function SideBar({ setVehicleType, onSearch, ...filterProps }) {
     return (
         <div className="box-side">
-            {/* აირჩიეთ მანქანის ტიპი */}
             <div className="car-selector">
                 <button className="car" onClick={() => setVehicleType("car")}>
                     <img src="/src/photos/car.svg" alt="მანქანა" />
@@ -17,12 +17,10 @@ function SideBar({ setVehicleType, ...filterProps }) {
                 </button>
             </div>
 
-            {/* ფილტრები კომპონენტი */}
             <Filters {...filterProps} />
 
-            {/* ძებნის ღილაკი */}
             <div className="search-btn">
-                <button>ძებნა</button>
+                <button onClick={onSearch}>ძებნა</button>
             </div>
         </div>
     );

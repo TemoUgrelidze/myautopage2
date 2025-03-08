@@ -136,12 +136,13 @@ const Filters = ({
     );
 
     const categoryOptions = useMemo(() =>
-            categories.map(cat => ({
+            Array.isArray(categories) ? categories.map(cat => ({
                 id: cat.category_id,
                 name: categoryModelMapping[cat.category_id] || cat.title
-            })),
+            })) : [], // თუ `categories` არ არის მასივი, დააბრუნე ცარიელი მასივი
         [categories]
     );
+
 
     const handleSaleTypeChange = useCallback((e) => {
         setSaleType(e.target.value);

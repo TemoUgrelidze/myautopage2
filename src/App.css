@@ -11,17 +11,32 @@ body {
     color: #333;
 }
 
+/* Main Layout Container */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    padding: 50px 20px;
+    gap: 30px;
+}
+
 /* Sidebar Container */
 .box-side {
     width: 280px;
+    min-width: 280px;
     background: white;
     border-radius: 15px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    position: absolute;
-    top: 50px;
-    left: 100px;
-    transition: all 0.3s ease-in-out;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+    margin-left: 20px;
+}
+
+/* Main Content Container */
+.main-content {
+    flex: 1;
+    margin-left: 320px;
 }
 
 /* Car Selector */
@@ -125,7 +140,6 @@ body {
 }
 
 .currency-btn {
-
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
@@ -163,11 +177,12 @@ body {
     background: #E64900;
 }
 
-/* Car Card Styles */
+/* Car Listings Container */
 .container {
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-right: 20px;
 }
 
 .grid {
@@ -176,9 +191,12 @@ body {
     flex-direction: column;
     gap: 15px;
     width: 100%;
-    max-width: 650px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* Car Card Styles */
 .car-card {
     display: flex;
     align-items: center;
@@ -252,16 +270,46 @@ body {
     -moz-appearance: textfield;
 }
 
+/* Loading and No Results States */
+.loading-text {
+    text-align: center;
+    font-size: 18px;
+    color: #666;
+    margin-top: 30px;
+}
+
+.no-results {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+    .app-container {
+        flex-direction: column;
+        padding: 20px;
+    }
+
     .box-side {
-        width: 90%;
-        left: 50%;
-        transform: translateX(-50%);
+        position: relative;
+        width: 100%;
+        margin: 0;
+        top: 0;
+        min-width: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
     }
 
     .grid {
-        max-width: 90%;
+        max-width: 100%;
     }
 
     .car-card {
@@ -286,5 +334,30 @@ body {
     .currency-toggle {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Additional Mobile Optimizations */
+@media (max-width: 480px) {
+    .app-container {
+        padding: 10px;
+    }
+
+    .car-selector button {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .properties select,
+    .price-input {
+        font-size: 13px;
+    }
+
+    .car-title {
+        font-size: 16px;
+    }
+
+    .car-price {
+        font-size: 18px;
     }
 }
