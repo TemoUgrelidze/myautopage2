@@ -1,11 +1,15 @@
 // Main.jsx
 import React, { useEffect, useState } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
+import SortDropdown from './SortDropdown';
+import PeriodFilter from './PeriodFilter';
 
-const Main = ({    searchResults, isSearched }) => {
+const Main = ({ searchResults, isSearched }) => {
     const [cars, setCars] = useState([]);
     const [manufacturers, setManufacturers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sortedCars, setSortedCars] = useState([]);
+    const [, setSelectedPeriod] = useState(null);
 
     const categoryMapping = {
         "1": "სედანი",
@@ -27,6 +31,7 @@ const Main = ({    searchResults, isSearched }) => {
 
                 if (!ignore) {
                     setCars(carData || []);
+                    setSortedCars(carData || []);
                     setManufacturers(manufacturerData || []);
                 }
             } catch (error) {
@@ -44,6 +49,57 @@ const Main = ({    searchResults, isSearched }) => {
         };
     }, []);
 
+    useEffect(() => {
+        setSortedCars(isSearched ? searchResults : cars);
+        setSelectedPeriod(null); // Reset period filter when search results change
+    }, [searchResults, cars, isSearched]);
+
+    const handleSort = ({ field, order }) => {
+        const sorted = [...sortedCars].sort((a, b) => {
+            let compareA, compareB;
+
+            switch(field) {
+                case 'date':
+                    compareA = new Date(a.car_date).getTime();
+                    compareB = new Date(b.car_date).getTime();
+                    break;
+                case 'price':
+                    compareA = parseFloat(a.price) || 0;
+                    compareB = parseFloat(b.price) || 0;
+                    break;
+                case 'mileage':
+                    compareA = parseInt(a.car_run_km) || 0;
+                    compareB = parseInt(b.car_run_km) || 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (order === 'desc') {
+                return compareB - compareA; // კლებადობით
+            } else {
+                return compareA - compareB; // ზრდადობით
+            }
+        });
+
+        setSortedCars(sorted);
+    };
+
+
+    const handlePeriodChange = (hours) => {
+        setSelectedPeriod(hours);
+        const now = new Date();
+        const periodAgo = new Date(now - hours * 60 * 60 * 1000);
+
+        const baseList = isSearched ? searchResults : cars;
+        const filteredCars = baseList.filter(car => {
+            const carDate = new Date(car.car_date);
+            return carDate >= periodAgo;
+        });
+
+        setSortedCars(filteredCars);
+    };
+
     const getCarName = React.useCallback((manId) => {
         const manufacturer = manufacturers.find((man) => man.man_id === manId);
         return manufacturer ? manufacturer.man_name : "Unknown Manufacturer";
@@ -58,7 +114,7 @@ const Main = ({    searchResults, isSearched }) => {
                     className="car-image"
                     loading="lazy"
                     onError={(e) => {
-                        e.target.src = '/path/to/fallback/image.jpg'; // დაამატეთ fallback სურათი
+                        e.target.src = '/path/to/fallback/image.jpg';
                         e.target.onerror = null;
                     }}
                 />
@@ -91,8 +147,6 @@ const Main = ({    searchResults, isSearched }) => {
         </div>
     ));
 
-    const displayCars = isSearched ? searchResults : cars;
-
     if (loading) {
         return (
             <div className="loading-container">
@@ -103,13 +157,19 @@ const Main = ({    searchResults, isSearched }) => {
 
     return (
         <div className="main-container">
-            {displayCars && displayCars.length > 0 ? (
+            {sortedCars && sortedCars.length > 0 ? (
                 <>
-                    <div className="results-count">
-                        ნაპოვნია: {displayCars.length} განცხადება
+                    <div className="header-container">
+                        <div className="results-count">
+                            ნაპოვნია: {sortedCars.length} განცხადება
+                        </div>
+                        <div className="filters-container">
+                            <PeriodFilter onPeriodChange={handlePeriodChange} />
+                            <SortDropdown onSort={handleSort} />
+                        </div>
                     </div>
                     <div className="cars-grid">
-                        {displayCars.map((car) => (
+                        {sortedCars.map((car) => (
                             <CarCard
                                 key={car.car_id || car.id}
                                 car={car}

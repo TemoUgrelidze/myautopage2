@@ -1,4 +1,4 @@
-// src/components/SortDropdown.jsx
+// SortDropdown.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 const SortDropdown = ({ onSort }) => {
@@ -6,12 +6,12 @@ const SortDropdown = ({ onSort }) => {
     const dropdownRef = useRef(null);
 
     const sortOptions = [
-        { id: 'date-desc', name: 'თარიღი კლებადი', value: { field: 'date', order: 'desc' } },
-        { id: 'date-asc', name: 'თარიღი ზრდადი', value: { field: 'date', order: 'asc' } },
-        { id: 'price-desc', name: 'ფასი კლებადი', value: { field: 'price', order: 'desc' } },
-        { id: 'price-asc', name: 'ფასი ზრდადი', value: { field: 'price', order: 'asc' } },
-        { id: 'mileage-desc', name: 'გარბენი კლებადი', value: { field: 'mileage', order: 'desc' } },
-        { id: 'mileage-asc', name: 'გარბენი ზრდადი', value: { field: 'mileage', order: 'asc' } },
+        { id: 'price-desc', name: 'ფასი: ძვირიდან იაფისკენ', value: { field: 'price', order: 'desc' } },
+        { id: 'price-asc', name: 'ფასი: იაფიდან ძვირისკენ', value: { field: 'price', order: 'asc' } },
+        { id: 'date-desc', name: 'თარიღი: ახლიდან ძველისკენ', value: { field: 'date', order: 'desc' } },
+        { id: 'date-asc', name: 'თარიღი: ძველიდან ახლისკენ', value: { field: 'date', order: 'asc' } },
+        { id: 'mileage-desc', name: 'გარბენი: მეტიდან ნაკლებისკენ', value: { field: 'mileage', order: 'desc' } },
+        { id: 'mileage-asc', name: 'გარბენი: ნაკლებიდან მეტისკენ', value: { field: 'mileage', order: 'asc' } },
     ];
 
     useEffect(() => {
