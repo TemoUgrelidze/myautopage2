@@ -5,6 +5,15 @@ import Filters from "./Filters";
 function SideBar({ setVehicleType, onSearch, ...filterProps }) {
     return (
         <div className="box-side">
+            {/* ლოგოს კონტეინერი */}
+            <div className="logo-container">
+                <img
+                    src="/images/myauto-logo.svg"  // გზა შეცვლილია
+                    alt="MyAuto.ge"
+                    className="myauto-logo"
+                />
+            </div>
+
             <div className="car-selector">
                 <button className="car" onClick={() => setVehicleType("car")}>
                     <img src="/src/photos/car.svg" alt="მანქანა" />

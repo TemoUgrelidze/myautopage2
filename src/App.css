@@ -19,8 +19,32 @@ body {
     gap: 30px;
 }
 
+/* თქვენი არსებული სტილები */
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.myauto-logo {
+    width: 161px;
+    height: 46px;
+    object-fit: contain;
+}
+
+/* თქვენი არსებული car-selector სტილები */
+.car-selector {
+    margin-top: 20px; /* დავამატოთ ზედა margin ლოგოს შემდეგ */
+}
+
+
 .box-side {
-    width: 280px;
+    width: 350px;
     min-width: 280px;
     background: white;
     border-radius: 15px;
@@ -35,6 +59,14 @@ body {
 .main-content {
     flex: 1;
     margin-left: 320px;
+}
+
+/* Main Content Layout */
+.main-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* Car Selector */
@@ -174,28 +206,59 @@ body {
     background: #E64900;
 }
 
+/* Header and Filters */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.results-count {
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+}
+
+.filters-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Cars Grid */
+.cars-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
 /* Car Card Styles */
 .car-card {
-
     display: flex;
     align-items: center;
     background: white;
     border-radius: 12px;
-    padding: 15px;
+    padding: 20px;
     box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-in-out;
+    width: 100%;
 }
 
 .car-card:hover {
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 
 .car-image-container {
     flex-shrink: 0;
-    width: 180px;
-    height: 120px;
+    width: 250px;
+    height: 160px;
     border-radius: 8px;
     overflow: hidden;
+    margin-right: 25px;
 }
 
 .car-image {
@@ -205,8 +268,10 @@ body {
 }
 
 .car-info {
-    margin-left: 15px;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .car-title {
@@ -238,34 +303,21 @@ body {
     margin-left: 5px;
 }
 
-/* Filters Container */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.filters-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-/* Dropdown Styles (shared between Sort and Period) */
+/* Dropdown Styles */
 .sort-dropdown,
 .period-dropdown {
     position: relative;
     z-index: 100;
+    min-width: 200px;
 }
 
 .sort-button,
 .period-button {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    justify-content: space-between;
+    padding: 12px 16px;
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -300,13 +352,12 @@ body {
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
-    overflow: hidden;
+    width: 100%;
+    min-width: 220px;
 }
 
 .sort-option,
 .period-option {
-    display: block;
     width: 100%;
     padding: 12px 16px;
     text-align: left;
@@ -316,6 +367,7 @@ body {
     color: #333;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .sort-option:hover,
@@ -338,6 +390,12 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .main-container {
+        padding: 0 15px;
+    }
+}
+
 @media (max-width: 1024px) {
     .app-container {
         flex-direction: column;
@@ -354,196 +412,6 @@ body {
 
     .main-content {
         margin-left: 0;
-    }
-
-    .car-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .car-image-container {
-        width: 100%;
-        height: 180px;
-    }
-
-    .car-info {
-        margin-left: 0;
-        margin-top: 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    .filters-container {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-
-    .sort-dropdown,
-    .period-dropdown {
-        width: 100%;
-    }
-
-    .sort-button,
-    .period-button {
-        width: 100%;
-        justify-content: space-between;
-    }
-}
-
-@media (max-width: 480px) {
-    .app-container {
-        padding: 10px;
-    }
-
-    .car-selector button,
-    .properties select,
-    .price-input {
-        font-size: 13px;
-    }
-
-    .car-title {
-        font-size: 16px;
-    }
-
-    .car-price {
-        font-size: 18px;
-    }
-}
-
-
-
-/* Main Content Layout */
-.main-container {
-    width: 100%;
-    max-width: 1200px; /* გაზრდილი მაქსიმალური სიგანე */
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Header and Filters */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.results-count {
-    font-size: 16px;
-    color: #666;
-    font-weight: 500;
-}
-
-.filters-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-/* Cars Grid */
-.cars-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-}
-
-/* Car Card */
-.car-card {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-    width: 100%;
-}
-
-.car-card:hover {
-    transform: scale(1.02);
-}
-
-.car-image-container {
-    flex-shrink: 0;
-    width: 250px; /* გაზრდილი სურათის ზომა */
-    height: 160px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-right: 25px;
-}
-
-.car-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.car-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Dropdown Styles */
-.sort-dropdown,
-.period-dropdown {
-    position: relative;
-    z-index: 100;
-    min-width: 200px; /* მინიმალური სიგანე დროფდაუნებისთვის */
-}
-
-.sort-button,
-.period-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.sort-options,
-.period-options {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 4px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    min-width: 220px; /* გაზრდილი მინიმალური სიგანე ოფციებისთვის */
-}
-
-.sort-option,
-.period-option {
-    width: 100%;
-    padding: 12px 16px;
-    text-align: left;
-    border: none;
-    background: none;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap; /* ტექსტი არ გადავიდეს ახალ ხაზზე */
-}
-
-/* Responsive Adjustments */
-@media (max-width: 1200px) {
-    .main-container {
-        padding: 0 15px;
     }
 }
 
@@ -593,8 +461,26 @@ body {
 }
 
 @media (max-width: 480px) {
+    .app-container {
+        padding: 10px;
+    }
+
     .main-container {
         padding: 0 10px;
+    }
+
+    .car-selector button,
+    .properties select,
+    .price-input {
+        font-size: 13px;
+    }
+
+    .car-title {
+        font-size: 16px;
+    }
+
+    .car-price {
+        font-size: 18px;
     }
 
     .car-image-container {
