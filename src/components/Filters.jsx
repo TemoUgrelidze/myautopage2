@@ -21,10 +21,7 @@ const Select = React.memo(({
         >
             <option value="">{`${defaultOption}`}</option>
             {options.map((option) => (
-                <option
-                    key={option.id}
-                    value={option.id}
-                >
+                <option key={option.id} value={option.id}>
                     {option.name}
                 </option>
             ))}
@@ -36,30 +33,20 @@ const PriceRangeInput = React.memo(({
                                         value,
                                         onChange,
                                         placeholder,
-                                        className
-                                    }) => (
-    <input
-        type="number"
-        className={className}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        min="0"
-    />
-));
-
-const CurrencyToggle = React.memo(({ currency, setCurrency }) => {
-    const toggleCurrency = useCallback(() => {
-        setCurrency(prevCurrency => prevCurrency === 'GEL' ? 'USD' : 'GEL');
-    }, [setCurrency]);
+                                        className,
+                                        currency
+                                    }) => {
+    
 
     return (
-        <button
-            className="currency-toggle-btn"
-            onClick={toggleCurrency}
-        >
-            {currency === 'GEL' ? '₾' : '$'}
-        </button>
+        <input
+            type="number"
+            className={className}
+            value={value}
+            onChange={onChange}
+            placeholder={`${placeholder} ${currency === 'GEL' ? '₾' : '$'}`}
+            min="0"
+        />
     );
 });
 
@@ -93,21 +80,18 @@ const Filters = ({
 
     useEffect(() => {
         const filterModelsByCategory = () => {
-            console.log('Original models:', models);
             let filtered = [...models];
 
             if (selectedManufacturer) {
                 filtered = filtered.filter(model =>
                     String(model.manufacturer_id) === String(selectedManufacturer)
                 );
-                console.log('After manufacturer filter:', filtered);
             }
 
             if (category) {
                 filtered = filtered.filter(model =>
                     String(model.category_id) === String(category)
                 );
-                console.log('After category filter:', filtered);
             }
 
             const formattedModels = filtered.map(model => ({
@@ -115,7 +99,6 @@ const Filters = ({
                 name: model.model_name
             }));
 
-            console.log('Final formatted models:', formattedModels);
             setFilteredModels(formattedModels);
         };
 
@@ -139,10 +122,9 @@ const Filters = ({
             Array.isArray(categories) ? categories.map(cat => ({
                 id: cat.category_id,
                 name: categoryModelMapping[cat.category_id] || cat.title
-            })) : [], // თუ `categories` არ არის მასივი, დააბრუნე ცარიელი მასივი
+            })) : [],
         [categories]
     );
-
 
     const handleSaleTypeChange = useCallback((e) => {
         setSaleType(e.target.value);
@@ -177,6 +159,27 @@ const Filters = ({
             setMaxPrice(value);
         }
     }, [setMaxPrice]);
+
+    const handleCurrencyChange = useCallback(() => {
+        const newCurrency = currency === 'GEL' ? 'USD' : 'GEL';
+        const exchangeRate = 2.65;
+
+        if (minPrice) {
+            const convertedMin = newCurrency === 'USD'
+                ? (Number(minPrice) / exchangeRate).toFixed(0)
+                : (Number(minPrice) * exchangeRate).toFixed(0);
+            setMinPrice(convertedMin);
+        }
+
+        if (maxPrice) {
+            const convertedMax = newCurrency === 'USD'
+                ? (Number(maxPrice) / exchangeRate).toFixed(0)
+                : (Number(maxPrice) * exchangeRate).toFixed(0);
+            setMaxPrice(convertedMax);
+        }
+
+        setCurrency(newCurrency);
+    }, [currency, minPrice, maxPrice, setMinPrice, setMaxPrice, setCurrency]);
 
     return (
         <div className="properties">
@@ -220,7 +223,12 @@ const Filters = ({
             <div className="price-range">
                 <div className="price-header">
                     <label>ფასი</label>
-                    <CurrencyToggle currency={currency} setCurrency={setCurrency} />
+                    <button
+                        className="currency-toggle-btn"
+                        onClick={handleCurrencyChange}
+                    >
+                        {currency === 'GEL' ? '₾' : '$'}
+                    </button>
                 </div>
                 <div className="price-inputs">
                     <PriceRangeInput
@@ -228,6 +236,7 @@ const Filters = ({
                         value={minPrice}
                         onChange={handleMinPriceChange}
                         placeholder="დან"
+                        currency={currency}
                     />
                     <span className="price-separator">-</span>
                     <PriceRangeInput
@@ -235,6 +244,7 @@ const Filters = ({
                         value={maxPrice}
                         onChange={handleMaxPriceChange}
                         placeholder="მდე"
+                        currency={currency}
                     />
                 </div>
             </div>
@@ -300,11 +310,8 @@ PriceRangeInput.propTypes = {
     onChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
     className: PropTypes.string,
-};
-
-CurrencyToggle.propTypes = {
     currency: PropTypes.oneOf(['GEL', 'USD']).isRequired,
-    setCurrency: PropTypes.func.isRequired,
+    exchangeRate: PropTypes.number
 };
 
 export default React.memo(Filters);
