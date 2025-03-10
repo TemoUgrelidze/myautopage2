@@ -1,4 +1,4 @@
-// CarList.jsx
+
 import React, { useEffect, useState } from 'react';
 
 function CarList({ selectedManufacturer }) {
