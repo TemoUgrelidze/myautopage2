@@ -6,28 +6,113 @@ const Select = React.memo(({
                                value,
                                onChange,
                                options,
-                               className,
                                disabled = false,
-                               defaultOption = "ყველა"
-                           }) => (
-    <>
-        <label htmlFor={className}>{label}</label>
-        <select
-            id={className}
-            className={className}
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-        >
-            <option value="">{`${defaultOption}`}</option>
-            {options.map((option) => (
-                <option key={option.id} value={option.id}>
-                    {option.name}
-                </option>
-            ))}
-        </select>
-    </>
-));
+                               defaultOption = "ყველა",
+                               isMultiSelect = false
+                           }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedItems, setSelectedItems] = useState(
+        isMultiSelect ? (Array.isArray(value) ? value : []) : value
+    );
+
+    const filteredOptions = options.filter(option =>
+        option.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleCheckboxChange = (optionId) => {
+        let newSelectedItems;
+        if (Array.isArray(selectedItems)) {
+            newSelectedItems = selectedItems.includes(optionId)
+                ? selectedItems.filter(id => id !== optionId)
+                : [...selectedItems, optionId];
+            setSelectedItems(newSelectedItems);
+            onChange({ target: { value: newSelectedItems } });
+        }
+    };
+
+    if (isMultiSelect) {
+        return (
+            <div className="select-container">
+                <label>{label}</label>
+                <div className="custom-select">
+                    <div
+                        className={`select-header ${disabled ? 'disabled' : ''}`}
+                        onClick={() => !disabled && setIsOpen(!isOpen)}
+                    >
+                        <span>
+                            {Array.isArray(selectedItems) && selectedItems.length > 0
+                                ? `არჩეულია ${selectedItems.length}`
+                                : defaultOption}
+                        </span>
+                        <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                    </div>
+
+                    {isOpen && !disabled && (
+                        <div className="select-dropdown">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="ძებნა..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="options-container">
+                                {filteredOptions.map((option) => (
+                                    <label key={option.id} className="option-item">
+                                        <input
+                                            type="checkbox"
+                                            checked={Array.isArray(selectedItems) &&
+                                                selectedItems.includes(option.id)}
+                                            onChange={() => handleCheckboxChange(option.id)}
+                                        />
+                                        <span>{option.name}</span>
+                                    </label>
+                                ))}
+                                {filteredOptions.length === 0 && (
+                                    <div className="no-results">შედეგები არ მოიძებნა</div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="select-container">
+            <label>{label}</label>
+            <div className="custom-select">
+                <div
+                    className={`select-header ${disabled ? 'disabled' : ''}`}
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                >
+                    <span>{value || defaultOption}</span>
+                    <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                </div>
+
+                {isOpen && !disabled && (
+                    <div className="select-dropdown">
+                        <div className="options-container">
+                            {options.map((option) => (
+                                <label key={option.id} className="option-item">
+                                    <input
+                                        type="radio"
+                                        checked={value === option.id}
+                                        onChange={() => onChange({ target: { value: option.id } })}
+                                    />
+                                    <span>{option.name}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
 
 const PriceRangeInput = React.memo(({
                                         value,
@@ -35,20 +120,16 @@ const PriceRangeInput = React.memo(({
                                         placeholder,
                                         className,
                                         currency
-                                    }) => {
-
-
-    return (
-        <input
-            type="number"
-            className={className}
-            value={value}
-            onChange={onChange}
-            placeholder={`${placeholder} ${currency === 'GEL' ? '₾' : '$'}`}
-            min="0"
-        />
-    );
-});
+                                    }) => (
+    <input
+        type="number"
+        className={className}
+        value={value}
+        onChange={onChange}
+        placeholder={`${placeholder} ${currency === 'GEL' ? '₾' : '$'}`}
+        min="0"
+    />
+));
 
 const Filters = ({
                      saleType,
@@ -69,6 +150,7 @@ const Filters = ({
                      currency,
                      setCurrency
                  }) => {
+
     const [filteredModels, setFilteredModels] = useState([]);
 
     const categoryModelMapping = {
@@ -82,12 +164,16 @@ const Filters = ({
         const filterModelsByCategory = () => {
             let filtered = [...models];
 
-            if (selectedManufacturer) {
+            // თუ არჩეულია ერთი ან მეტი მწარმოებელი
+            if (selectedManufacturer && selectedManufacturer.length > 0) {
                 filtered = filtered.filter(model =>
-                    String(model.manufacturer_id) === String(selectedManufacturer)
+                    selectedManufacturer.some(manId =>
+                        String(model.manufacturer_id) === String(manId)
+                    )
                 );
             }
 
+            // თუ არჩეულია კატეგორია
             if (category) {
                 filtered = filtered.filter(model =>
                     String(model.category_id) === String(category)
@@ -96,7 +182,8 @@ const Filters = ({
 
             const formattedModels = filtered.map(model => ({
                 id: model.model_id,
-                name: model.model_name
+                name: model.model_name,
+                manufacturer_id: model.manufacturer_id // დავამატოთ ეს ინფორმაცია
             }));
 
             setFilteredModels(formattedModels);
@@ -105,9 +192,10 @@ const Filters = ({
         filterModelsByCategory();
     }, [selectedManufacturer, category, models]);
 
+
     const saleTypeOptions = useMemo(() => [
-        { id: "1", name: "იყიდება" },
-        { id: "2", name: "ქირავდება" }
+        {id: "1", name: "იყიდება"},
+        {id: "2", name: "ქირავდება"}
     ], []);
 
     const manufacturerOptions = useMemo(() =>
@@ -131,10 +219,14 @@ const Filters = ({
     }, [setSaleType]);
 
     const handleManufacturerChange = useCallback((e) => {
-        const newManufacturer = e.target.value;
-        setSelectedManufacturer(newManufacturer);
+        const newManufacturers = e.target.value;
+        setSelectedManufacturer(newManufacturers);
+
+        // გავასუფთაოთ არჩეული მოდელი როცა მწარმოებელი იცვლება
         setSelectedModel("");
     }, [setSelectedManufacturer, setSelectedModel]);
+
+
 
     const handleCategoryChange = useCallback((e) => {
         const newCategory = e.target.value;
@@ -164,22 +256,21 @@ const Filters = ({
         const newCurrency = currency === 'GEL' ? 'USD' : 'GEL';
         const exchangeRate = 2.65;
 
-        if (minPrice) {
-            const convertedMin = newCurrency === 'USD'
-                ? (Number(minPrice) / exchangeRate).toFixed(0)
-                : (Number(minPrice) * exchangeRate).toFixed(0);
-            setMinPrice(convertedMin);
+        let newMinPrice = minPrice;
+        let newMaxPrice = maxPrice;
+
+        if (newCurrency === 'USD') {
+            newMinPrice = (Number(minPrice) / exchangeRate).toFixed(0);
+            newMaxPrice = (Number(maxPrice) / exchangeRate).toFixed(0);
+        } else {
+            newMinPrice = (Number(minPrice) * exchangeRate).toFixed(0);
+            newMaxPrice = (Number(maxPrice) * exchangeRate).toFixed(0);
         }
 
-        if (maxPrice) {
-            const convertedMax = newCurrency === 'USD'
-                ? (Number(maxPrice) / exchangeRate).toFixed(0)
-                : (Number(maxPrice) * exchangeRate).toFixed(0);
-            setMaxPrice(convertedMax);
-        }
-
+        setMinPrice(newMinPrice);
+        setMaxPrice(newMaxPrice);
         setCurrency(newCurrency);
-    }, [currency, minPrice, maxPrice, setMinPrice, setMaxPrice, setCurrency]);
+    }, [currency, minPrice, maxPrice, setCurrency, setMinPrice, setMaxPrice]);
 
     return (
         <div className="properties">
@@ -199,6 +290,7 @@ const Filters = ({
                 onChange={handleManufacturerChange}
                 options={manufacturerOptions}
                 defaultOption="ყველა მწარმოებელი"
+                isMultiSelect={true}
             />
 
             <Select
@@ -252,11 +344,10 @@ const Filters = ({
     );
 };
 
-// Props ვალიდაცია
 Filters.propTypes = {
     saleType: PropTypes.string.isRequired,
     setSaleType: PropTypes.func.isRequired,
-    selectedManufacturer: PropTypes.string.isRequired,
+    selectedManufacturer: PropTypes.arrayOf(PropTypes.string).isRequired,
     setSelectedManufacturer: PropTypes.func.isRequired,
     manufacturers: PropTypes.arrayOf(
         PropTypes.shape({
@@ -292,7 +383,10 @@ Filters.propTypes = {
 
 Select.propTypes = {
     label: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string)
+    ]).isRequired,
     onChange: PropTypes.func.isRequired,
     options: PropTypes.arrayOf(
         PropTypes.shape({
@@ -303,6 +397,7 @@ Select.propTypes = {
     className: PropTypes.string.isRequired,
     disabled: PropTypes.bool,
     defaultOption: PropTypes.string,
+    isMultiSelect: PropTypes.bool
 };
 
 PriceRangeInput.propTypes = {
@@ -311,7 +406,6 @@ PriceRangeInput.propTypes = {
     placeholder: PropTypes.string,
     className: PropTypes.string,
     currency: PropTypes.oneOf(['GEL', 'USD']).isRequired,
-    exchangeRate: PropTypes.number
 };
 
 export default React.memo(Filters);

@@ -9,7 +9,7 @@ function App() {
     const [manufacturers, setManufacturers] = useState([]);
     const [vehicleType, setVehicleType] = useState("car");
     const [saleType, setSaleType] = useState("");
-    const [selectedManufacturer, setSelectedManufacturer] = useState("");
+    const [selectedManufacturer, setSelectedManufacturer] = useState([]);
     const [category, setCategory] = useState("");
     const [categories, setCategories] = useState([]);
     const [models, setModels] = useState([]);
@@ -70,8 +70,9 @@ function App() {
             const carListings = await fetchCarListings();
 
             const results = carListings.filter(car => {
-                const manufacturerMatch = !selectedManufacturer ||
-                    String(car.man_id) === String(selectedManufacturer);
+                // მწარმოებლების შემოწმება - თუ არჩეულია ერთი ან მეტი მწარმოებელი
+                const manufacturerMatch = selectedManufacturer.length === 0 ||
+                    selectedManufacturer.includes(String(car.man_id));
 
                 const modelMatch = !selectedModel ||
                     String(car.model_id) === String(selectedModel);
@@ -95,6 +96,7 @@ function App() {
             setSearchResults([]);
         }
     };
+
 
     return (
         <div className="app-container">

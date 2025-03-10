@@ -22,6 +22,24 @@ const Main = ({ searchResults, isSearched }) => {
         "9": "კაბრიოლეტი", "10": "ფურგონი"
     };
 
+    const transmissionTypes = {
+        "1": "მექანიკა",
+        "2": "ავტომატიკა",
+        "3": "ტიპტრონიკი",
+        "4": "ვარიატორი"
+    };
+
+    const fuelTypes = {
+        "2": "ბენზინი",
+        "3": "დიზელი",
+        "4": "ელექტრო",
+        "5": "ჰიბრიდი",
+        "6": "ბუნებრივი გაზი",
+        "7": "თხევადი გაზი",
+        "8": "წყალბადი",
+        "9": "პლაგინ ჰიბრიდი"
+    };
+
     useEffect(() => {
         let ignore = false;
         const loadData = async () => {
@@ -133,7 +151,6 @@ const Main = ({ searchResults, isSearched }) => {
             : '/default-car.jpg';
 
         let gelPrice, usdPrice;
-
         if (car.price_usd) {
             usdPrice = parseFloat(car.price_usd);
             gelPrice = Math.round(usdPrice * exchangeRate);
@@ -147,11 +164,22 @@ const Main = ({ searchResults, isSearched }) => {
         const primarySymbol = currency === 'GEL' ? '₾' : '$';
         const secondarySymbol = currency === 'GEL' ? '$' : '₾';
 
+        const engineVolume = car.engine_volume
+            ? `${(car.engine_volume / 1000).toFixed(1)}L`
+            : '';
+
         return (
             <div className="car-card">
                 <div className="car-image-container">
-                    <img src={imageUrl} alt={carName} className="car-image" loading="lazy"
-                         onError={(e) => { e.target.src = '/default-car.jpg'; e.target.onerror = null; }}
+                    <img
+                        src={imageUrl}
+                        alt={carName}
+                        className="car-image"
+                        loading="lazy"
+                        onError={(e) => {
+                            e.target.src = '/default-car.jpg';
+                            e.target.onerror = null;
+                        }}
                     />
                 </div>
                 <div className="car-info">
@@ -159,12 +187,30 @@ const Main = ({ searchResults, isSearched }) => {
                         {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} წ` : ''}</span>
                     </h2>
                     <p className="car-category">{categoryMapping[car.category_id] || "სხვა"}</p>
-                    <p className="car-details">
-                        {car.engine_volume && <span className="engine">🚗 {car.engine_volume}</span>}
-                        {car.fuel_type && <span className="fuel">⛽ {car.fuel_type}</span>}
-                        {car.gear_type && <span className="gear">⚙️ {car.gear_type}</span>}
-                        {car.car_run_km && <span className="mileage">📍 {car.car_run_km} კმ</span>}
-                    </p>
+
+                    <div className="car-specs">
+                        <div className="specs-row">
+                            <span className="spec-item">
+                                <i className="spec-icon">🚘</i>
+                                {car.right_wheel ? "მარჯვენა" : "მარცხენა"} საჭე
+                            </span>
+                            <span className="spec-item">
+                                <i className="spec-icon">⚙️</i>
+                                {transmissionTypes[car.gear_type_id] || "გადაცემათა კოლოფი"}
+                            </span>
+                        </div>
+                        <div className="specs-row">
+                            <span className="spec-item">
+                                <i className="spec-icon">🔧</i>
+                                {engineVolume} {fuelTypes[car.fuel_type_id] || ""}
+                            </span>
+                            <span className="spec-item">
+                                <i className="spec-icon">📍</i>
+                                {car.car_run_km?.toLocaleString()} კმ
+                            </span>
+                        </div>
+                    </div>
+
                     <div className="car-price-section">
                         <div className="price-and-currency">
                             <div className="prices">
