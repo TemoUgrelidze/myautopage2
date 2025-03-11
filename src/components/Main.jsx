@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
 import SortDropdown from './SortDropdown';
 import PeriodFilter from './PeriodFilter';
+import { FaHeart, FaEye, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+
 
 const Main = ({ searchResults, isSearched }) => {
     const [cars, setCars] = useState([]);
@@ -144,104 +147,176 @@ const Main = ({ searchResults, isSearched }) => {
     }, [manufacturerData]);
 
     const CarCard = React.memo(({ car }) => {
-        if (!car) return null;
-        const carName = getCarName(car.man_id, car.model_id);
-        const imageUrl = car.photo
-            ? `https://static.my.ge/myauto/photos/${car.photo}/thumbs/${car.car_id}_1.jpg?v=${car.photo_ver}`
-            : '/default-car.jpg';
+    const [isFavorite, setIsFavorite] = useState(false);
 
-        let gelPrice, usdPrice;
-        if (car.price_usd) {
-            usdPrice = parseFloat(car.price_usd);
-            gelPrice = Math.round(usdPrice * exchangeRate);
-        } else if (car.price) {
-            gelPrice = parseFloat(car.price);
-            usdPrice = Math.round(gelPrice / exchangeRate);
+    if (!car) return null;
+    const carName = getCarName(car.man_id, car.model_id);
+    const imageUrl = car.photo
+        ? `https://static.my.ge/myauto/photos/${car.photo}/thumbs/${car.car_id}_1.jpg?v=${car.photo_ver}`
+        : '/default-car.jpg';
+
+    let gelPrice, usdPrice;
+    if (car.price_usd) {
+        usdPrice = parseFloat(car.price_usd);
+        gelPrice = Math.round(usdPrice * exchangeRate);
+    } else if (car.price) {
+        gelPrice = parseFloat(car.price);
+        usdPrice = Math.round(gelPrice / exchangeRate);
+    }
+
+    const getLocationText = () => {
+        const locations = {
+            0: 'თბილისი',
+            1: 'ქუთაისი',
+            2: 'რუსთავის ავტობაზრობა',
+            3: 'ამერიკა',
+            4: 'ევროპა',
+            5: 'დუბაი'
+        };
+
+        if (car.car_status === 2) return 'გზაში';
+        if (car.customs_passed) {
+            return locations[car.location_id] || 'საქართველო';
+        }
+        return locations[car.location_id] || 'საზღვარგარეთ';
+    };
+
+    const calculateCustomsDuty = () => {
+        if (car.customs_passed) return 0;
+
+        const currentYear = new Date().getFullYear();
+        const carAge = currentYear - car.prod_year;
+        const engineVolume = car.engine_volume / 1000;
+        let basePrice = parseFloat(car.price_usd) || 0;
+
+        if (car.fuel_type_id === 5) {
+            return Math.round(basePrice * (carAge <= 6 ? 0.05 : 0.095));
         }
 
-        const primaryPrice = currency === 'GEL' ? gelPrice : usdPrice;
-        const secondaryPrice = currency === 'GEL' ? usdPrice : gelPrice;
-        const primarySymbol = currency === 'GEL' ? '₾' : '$';
-        const secondarySymbol = currency === 'GEL' ? '$' : '₾';
+        if (car.fuel_type_id === 4) return 0;
 
-        const engineVolume = car.engine_volume
-            ? `${(car.engine_volume / 1000).toFixed(1)}L`
-            : '';
+        let excise = engineVolume * ((carAge + 1) * 50);
+        let importTax = basePrice * 0.12;
+        let vat = (basePrice + excise + importTax) * 0.18;
 
-        return (
-            <div className="car-card">
-                <div className="car-image-container">
-                    <img
-                        src={imageUrl}
-                        alt={carName}
-                        className="car-image"
-                        loading="lazy"
-                        onError={(e) => {
-                            e.target.src = '/default-car.jpg';
-                            e.target.onerror = null;
-                        }}
-                    />
-                </div>
-                <div className="car-info">
-                    <h2 className="car-title">
-                        {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} წ` : ''}</span>
-                    </h2>
-                    <p className="car-category">{categoryMapping[car.category_id] || "სხვა"}</p>
+        return Math.round(excise + importTax + vat);
+    };
 
-                    <div className="car-specs">
-                        <div className="specs-row">
-                            <span className="spec-item">
-                                <i className="spec-icon">🚘</i>
-                                {car.right_wheel ? "მარჯვენა" : "მარცხენა"} საჭე
-                            </span>
-                            <span className="spec-item">
-                                <i className="spec-icon">⚙️</i>
-                                {transmissionTypes[car.gear_type_id] || "გადაცემათა კოლოფი"}
-                            </span>
-                        </div>
-                        <div className="specs-row">
-                            <span className="spec-item">
-                                <i className="spec-icon">🔧</i>
-                                {engineVolume} {fuelTypes[car.fuel_type_id] || ""}
-                            </span>
-                            <span className="spec-item">
-                                <i className="spec-icon">📍</i>
-                                {car.car_run_km?.toLocaleString()} კმ
-                            </span>
-                        </div>
-                    </div>
+    const customsDutyAmount = calculateCustomsDuty();
+    const locationText = getLocationText();
 
-                    <div className="car-price-section">
-                        <div className="price-and-currency">
-                            <div className="prices">
-                                <span className="car-price">
-                                    {Number(primaryPrice).toLocaleString()} {primarySymbol}
-                                </span>
-                                <span className="car-price-secondary">
-                                    (~{Number(secondaryPrice).toLocaleString()} {secondarySymbol})
-                                </span>
-                            </div>
-                            <div className="currency-toggle-box">
-                                <button
-                                    className={`currency-toggle-btn ${currency === 'GEL' ? 'active' : ''}`}
-                                    onClick={() => handleCurrencyChange('GEL')}
-                                >
-                                    <span className="currency-symbol">₾</span>
-                                </button>
-                                <button
-                                    className={`currency-toggle-btn ${currency === 'USD' ? 'active' : ''}`}
-                                    onClick={() => handleCurrencyChange('USD')}
-                                >
-                                    <span className="currency-symbol">$</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    {car.for_rent === "1" && <span className="rental-badge">ქირავდება</span>}
+    const primaryPrice = currency === 'GEL' ? gelPrice : usdPrice;
+    const secondaryPrice = currency === 'GEL' ? usdPrice : gelPrice;
+    const primarySymbol = currency === 'GEL' ? '₾' : '$';
+    const secondarySymbol = currency === 'GEL' ? '$' : '₾';
+
+    const engineVolume = car.engine_volume
+        ? `${(car.engine_volume / 1000).toFixed(1)}L`
+        : '';
+
+    return (
+        <div className="car-card">
+            <div className="car-image-container">
+                <img
+                    src={imageUrl}
+                    alt={carName}
+                    className="car-image"
+                    loading="lazy"
+                    onError={(e) => {
+                        e.target.src = '/default-car.jpg';
+                        e.target.onerror = null;
+                    }}
+                />
+                {/* დაგულების ღილაკი */}
+                <button
+                    className={`favorite-button ${isFavorite ? 'active' : ''}`}
+                    onClick={() => setIsFavorite(!isFavorite)}
+                >
+                    <FaHeart />
+                </button>
+                {/* მდებარეობის ბეჯი */}
+                <div className="location-badge">
+                    <FaMapMarkerAlt />
+                    <span>{locationText}</span>
                 </div>
             </div>
-        );
-    });
+            <div className="car-info">
+                <h2 className="car-title">
+                    {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} წ` : ''}</span>
+                </h2>
+                <p className="car-category">{categoryMapping[car.category_id] || "სხვა"}</p>
+
+                <div className="car-specs">
+                    <div className="specs-row">
+                        <span className="spec-item">
+                            <i className="spec-icon">🚘</i>
+                            {car.right_wheel ? "მარჯვენა" : "მარცხენა"} საჭე
+                        </span>
+                        <span className="spec-item">
+                            <i className="spec-icon">⚙️</i>
+                            {transmissionTypes[car.gear_type_id] || "გადაცემათა კოლოფი"}
+                        </span>
+                    </div>
+                    <div className="specs-row">
+                        <span className="spec-item">
+                            <i className="spec-icon">🔧</i>
+                            {engineVolume} {fuelTypes[car.fuel_type_id] || ""}
+                        </span>
+                        <span className="spec-item">
+                            <i className="spec-icon">📍</i>
+                            {car.car_run_km?.toLocaleString()} კმ
+                        </span>
+                    </div>
+                </div>
+
+                <div className="customs-info">
+                    {car.customs_passed ? (
+                        <div className="customs-passed">
+                            <FaCheckCircle />
+                            <span>განბაჟებული</span>
+                        </div>
+                    ) : (
+                        <div className="customs-duty">
+                            <RiMoneyDollarCircleLine />
+                            <span>განბაჟება: {customsDutyAmount} $</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="car-price-section">
+                    <div className="price-and-currency">
+                        <div className="prices">
+                            <span className="car-price">
+                                {Number(primaryPrice).toLocaleString()} {primarySymbol}
+                            </span>
+                            <span className="car-price-secondary">
+                                (~{Number(secondaryPrice).toLocaleString()} {secondarySymbol})
+                            </span>
+                        </div>
+                        <div className="currency-toggle-box">
+                            <button
+                                className={`currency-toggle-btn ${currency === 'GEL' ? 'active' : ''}`}
+                                onClick={() => handleCurrencyChange('GEL')}
+                            >
+                                <span className="currency-symbol">₾</span>
+                            </button>
+                            <button
+                                className={`currency-toggle-btn ${currency === 'USD' ? 'active' : ''}`}
+                                onClick={() => handleCurrencyChange('USD')}
+                            >
+                                <span className="currency-symbol">$</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {car.for_rent === "1" && <span className="rental-badge">ქირავდება</span>}
+            </div>
+        </div>
+    );
+});
+
+
 
     if (loading) {
         return (
