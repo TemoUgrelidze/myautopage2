@@ -25,7 +25,7 @@ export const fetchCategories = async () => {
     }
 };
 
-// განახლებული fetchModels ფუნქცია
+//  fetchModels ფუნქცია
 export const fetchModels = async (manId) => {
     // თუ მწარმოებლის ID არ არის მითითებული, დავაბრუნოთ ცარიელი მასივი
     if (!manId || manId === "") {
