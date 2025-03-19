@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
 import SortDropdown from './SortDropdown';
