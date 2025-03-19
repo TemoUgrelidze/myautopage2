@@ -63,7 +63,7 @@ const Main = ({
         "1": "მექანიკა",
         "2": "ავტომატიკა",
         "3": "ტიპტრონიკი",
-        "4": "ვარიატორიი"
+        "4": "ვარიატორი"
     };
 
     const fuelTypes = {
@@ -183,50 +183,6 @@ const Main = ({
     // ფავორიტების პანელის გახსნა/დახურვა
     const toggleFavoritesPanel = () => {
         setShowFavoritesPanel(!showFavoritesPanel);
-    };
-
-    const FavoriteCarCard = ({ car, onRemove }) => {
-        if (!car) return null;
-        const carName = getCarName(car.man_id, car.model_id);
-        const imageUrl = car.photo
-            ? `https://static.my.ge/myauto/photos/${car.photo}/thumbs/${car.car_id}_1.jpg?v=${car.photo_ver}`
-            : '/default-car.jpg';
-
-        let gelPrice, usdPrice;
-        if (car.price_usd) {
-            usdPrice = parseFloat(car.price_usd);
-            gelPrice = Math.round(usdPrice * exchangeRate);
-        } else if (car.price) {
-            gelPrice = parseFloat(car.price);
-            usdPrice = Math.round(gelPrice / exchangeRate);
-        }
-
-        const primaryPrice = currency === 'GEL' ? gelPrice : usdPrice;
-        const primarySymbol = currency === 'GEL' ? '₾' : '$';
-
-        return (
-            <div className="favorite-car-card">
-                <img
-                    src={imageUrl}
-                    alt={carName}
-                    className="favorite-car-image"
-                    loading="lazy"
-                    onError={(e) => {
-                        e.target.src = '/default-car.jpg';
-                        e.target.onerror = null;
-                    }}
-                />
-                <div className="favorite-car-info">
-                    <h3 className="favorite-car-title">{carName}</h3>
-                    <p className="favorite-car-price">
-                        {Number(primaryPrice).toLocaleString()} {primarySymbol}
-                    </p>
-                </div>
-                <button className="favorite-remove-btn" onClick={() => onRemove(car)}>
-                    <FaTimes />
-                </button>
-            </div>
-        );
     };
 
     const CarCard = React.memo(({ car }) => {
