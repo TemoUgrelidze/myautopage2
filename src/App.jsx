@@ -18,6 +18,28 @@ function App() {
     const [currency, setCurrency] = useState("GEL");
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
+    // ფავორიტების სახელმწიფო
+    const [favorites, setFavorites] = useState([]);
+    // აქტიური ტაბის სახელმწიფო (ძებნა ან ფავორიტები)
+    const [activeTab, setActiveTab] = useState("search");
+
+    // ფავორიტების ჩატვირთვა localStorage-დან
+    useEffect(() => {
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+            try {
+                setFavorites(JSON.parse(savedFavorites));
+            } catch (error) {
+                console.error("Error loading favorites from localStorage:", error);
+                setFavorites([]);
+            }
+        }
+    }, []);
+
+    // ფავორიტების შენახვა localStorage-ში როცა ისინი იცვლება
+    useEffect(() => {
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }, [favorites]);
 
     // მწარმოებლებისა და კატეგორიების ჩატვირთვა
     useEffect(() => {
@@ -44,6 +66,7 @@ function App() {
                     // ჩატვირთვა მხოლოდ არჩეული მწარმოებლების მოდელების
                     const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
                     console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
+
                     setModels(manufacturerModels);
                 } catch (error) {
                     console.error("მოდელების ჩატვირთვის შეცდომა:", error);
@@ -76,6 +99,8 @@ function App() {
 
     const handleSearch = async () => {
         setIsSearched(true);
+        setActiveTab("search"); // ძებნის ტაბზე გადასვლა
+        window.location.hash = 'search';
         try {
             const carListings = await fetchCarListings();
 
@@ -107,6 +132,33 @@ function App() {
         }
     };
 
+    // ფავორიტებში დამატება/წაშლის ფუნქცია
+    const toggleFavorite = (car) => {
+        setFavorites(prevFavorites => {
+            // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
+            const isAlreadyFavorite = prevFavorites.some(fav => fav.car_id === car.car_id);
+
+            if (isAlreadyFavorite) {
+                // თუ უკვე ფავორიტებშია, წავშალოთ
+                return prevFavorites.filter(fav => fav.car_id !== car.car_id);
+            } else {
+                // თუ არ არის ფავორიტებში, დავამატოთ
+                return [...prevFavorites, car];
+            }
+        });
+    };
+
+    // შევამოწმოთ არის თუ არა მანქანა ფავორიტებში
+    const isFavorite = (carId) => {
+        return favorites.some(fav => fav.car_id === carId);
+    };
+
+    // ფავორიტების ტაბზე გადასვლა
+
+
+    // ძებნის ტაბზე გადასვლა
+
+
     return (
         <div className="app-container">
             <SideBar
@@ -135,8 +187,11 @@ function App() {
                 selectedManufacturer={selectedManufacturer}
                 selectedModel={selectedModel}
                 category={category}
-                searchResults={searchResults}
+                searchResults={activeTab === "search" ? searchResults : favorites}
                 isSearched={isSearched}
+                toggleFavorite={toggleFavorite}
+                isFavorite={isFavorite}
+                activeTab={activeTab}
             />
         </div>
     );
