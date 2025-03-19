@@ -1,9 +1,8 @@
-// App.jsx
 import { useState, useEffect } from "react";
 import "./App.css";
 import SideBar from "./components/SideBar.jsx";
 import Main from "./components/Main.jsx";
-import { fetchManufacturers, fetchCategories, fetchModels, fetchCarListings } from "./components/api.jsx";
+import { fetchManufacturers, fetchCategories, fetchCarListings } from "./components/api.jsx";
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
@@ -12,7 +11,7 @@ function App() {
     const [selectedManufacturer, setSelectedManufacturer] = useState([]);
     const [category, setCategory] = useState("");
     const [categories, setCategories] = useState([]);
-    const [models, setModels] = useState([]);
+    const [models, setModels] = useState([]); // Remove the useEffect hook that fetches models
     const [selectedModel, setSelectedModel] = useState("");
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
@@ -36,17 +35,6 @@ function App() {
         };
         loadInitialData();
     }, []);
-
-    // Fetch models when manufacturer changes
-    useEffect(() => {
-        if (selectedManufacturer) {
-            fetchModels(selectedManufacturer)
-                .then(setModels)
-                .catch(error => console.error("Error fetching models:", error));
-        } else {
-            setModels([]);
-        }
-    }, [selectedManufacturer]);
 
     // Filter manufacturers based on vehicle type
     const filteredManufacturers = manufacturers.filter((brand) => {
@@ -97,7 +85,6 @@ function App() {
         }
     };
 
-
     return (
         <div className="app-container">
             <SideBar
@@ -111,6 +98,7 @@ function App() {
                 manufacturers={filteredManufacturers}
                 categories={filteredCategories}
                 models={models}
+                setModels={setModels}
                 selectedModel={selectedModel}
                 setSelectedModel={setSelectedModel}
                 minPrice={minPrice}

@@ -16,9 +16,31 @@ const Select = React.memo(({
         isMultiSelect ? (Array.isArray(value) ? value : []) : value
     );
 
-    const filteredOptions = options.filter(option =>
-        option.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Update selectedItems when value changes from outside
+    useEffect(() => {
+        if (isMultiSelect) {
+            setSelectedItems(Array.isArray(value) ? value : []);
+        }
+    }, [value, isMultiSelect]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isOpen && !event.target.closest('.custom-select')) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
+    const filteredOptions = options && options.length > 0
+        ? options.filter(option =>
+            option.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        : [];
 
     const handleCheckboxChange = (optionId) => {
         let newSelectedItems;
@@ -89,23 +111,45 @@ const Select = React.memo(({
                     className={`select-header ${disabled ? 'disabled' : ''}`}
                     onClick={() => !disabled && setIsOpen(!isOpen)}
                 >
-                    <span>{value || defaultOption}</span>
+                    <span>
+                        {value ? options.find(opt => opt.id === value)?.name || defaultOption : defaultOption}
+                    </span>
                     <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
                 </div>
 
                 {isOpen && !disabled && (
                     <div className="select-dropdown">
                         <div className="options-container">
+                            {/* Add "All" option at the top */}
+                            <label className="option-item">
+                                <input
+                                    type="radio"
+                                    checked={!value}
+                                    onChange={() => {
+                                        onChange({ target: { value: "" } });
+                                        setIsOpen(false);
+                                    }}
+                                />
+                                <span>{defaultOption}</span>
+                            </label>
+
                             {options.map((option) => (
                                 <label key={option.id} className="option-item">
                                     <input
                                         type="radio"
                                         checked={value === option.id}
-                                        onChange={() => onChange({ target: { value: option.id } })}
+                                        onChange={() => {
+                                            onChange({ target: { value: option.id } });
+                                            setIsOpen(false);
+                                        }}
                                     />
                                     <span>{option.name}</span>
                                 </label>
                             ))}
+
+                            {options.length === 0 && (
+                                <div className="no-results">შედეგები არ მოიძებნა</div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -160,37 +204,54 @@ const Filters = ({
         "4": "უნივერსალი",
     };
 
+    // განახლებული useEffect მოდელების ფილტრაციისთვის
+    // განახლებული useEffect მოდელების ფილტრაციისთვის
     useEffect(() => {
         const filterModelsByCategory = () => {
+            console.log("მოდელები:", models); // დავამატოთ ლოგი დებაგისთვის
+
+            // თუ მოდელების მასივი ცარიელია, დავაბრუნოთ ცარიელი მასივი
+            if (!models || models.length === 0) {
+                console.log("მოდელები არ არის");
+                setFilteredModels([]);
+                return;
+            }
+
+            // ყველა მოდელის ასლი
             let filtered = [...models];
+            console.log("ფილტრაციამდე:", filtered.length);
 
-            // თუ არჩეულია ერთი ან მეტი მწარმოებელი
-            if (selectedManufacturer && selectedManufacturer.length > 0) {
-                filtered = filtered.filter(model =>
-                    selectedManufacturer.some(manId =>
-                        String(model.manufacturer_id) === String(manId)
-                    )
-                );
-            }
-
-            // თუ არჩეულია კატეგორია
+            // კატეგორიით ფილტრაცია, თუ არჩეულია
             if (category) {
-                filtered = filtered.filter(model =>
-                    String(model.category_id) === String(category)
-                );
+                filtered = filtered.filter(model => {
+                    const categoryMatch = model.category_id &&
+                        String(model.category_id) === String(category);
+                    return categoryMatch;
+                });
+                console.log("კატეგორიის შემდეგ:", filtered.length);
             }
 
+            // მწარმოებლით ფილტრაცია, თუ არჩეულია
+            if (selectedManufacturer && selectedManufacturer.length > 0) {
+                filtered = filtered.filter(model => {
+                    return selectedManufacturer.includes(String(model.manufacturer_id));
+                });
+                console.log("მწარმოებლის შემდეგ:", filtered.length);
+            }
+
+            // ფორმატირება UI-სთვის
             const formattedModels = filtered.map(model => ({
                 id: model.model_id,
                 name: model.model_name,
-                manufacturer_id: model.manufacturer_id // დავამატოთ ეს ინფორმაცია
+                manufacturer_id: model.manufacturer_id
             }));
 
+            console.log("საბოლოო მოდელები:", formattedModels.length);
             setFilteredModels(formattedModels);
         };
 
         filterModelsByCategory();
-    }, [selectedManufacturer, category, models]);
+    }, [models, category, selectedManufacturer]);
 
 
     const saleTypeOptions = useMemo(() => [
@@ -308,7 +369,7 @@ const Filters = ({
                 value={selectedModel}
                 onChange={handleModelChange}
                 options={filteredModels}
-                disabled={filteredModels.length === 0}
+                disabled={false}
                 defaultOption="ყველა მოდელი"
             />
 
