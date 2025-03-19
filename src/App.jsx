@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import SideBar from "./components/SideBar.jsx";
 import Main from "./components/Main.jsx";
-import { fetchManufacturers, fetchCategories, fetchCarListings } from "./components/api.jsx";
+import { fetchManufacturers, fetchCategories, fetchCarListings, fetchModelsForManufacturers } from "./components/api.jsx";
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
@@ -11,7 +11,7 @@ function App() {
     const [selectedManufacturer, setSelectedManufacturer] = useState([]);
     const [category, setCategory] = useState("");
     const [categories, setCategories] = useState([]);
-    const [models, setModels] = useState([]); // Remove the useEffect hook that fetches models
+    const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState("");
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
@@ -19,7 +19,7 @@ function App() {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
 
-    // Fetch manufacturers and categories
+    // მწარმოებლებისა და კატეგორიების ჩატვირთვა
     useEffect(() => {
         const loadInitialData = async () => {
             try {
@@ -35,6 +35,28 @@ function App() {
         };
         loadInitialData();
     }, []);
+
+    // მოდელების ჩატვირთვა როცა მწარმოებელი იცვლება
+    useEffect(() => {
+        const loadModelsForSelectedManufacturers = async () => {
+            if (selectedManufacturer && selectedManufacturer.length > 0) {
+                try {
+                    // ჩატვირთვა მხოლოდ არჩეული მწარმოებლების მოდელების
+                    const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
+                    console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
+                    setModels(manufacturerModels);
+                } catch (error) {
+                    console.error("მოდელების ჩატვირთვის შეცდომა:", error);
+                    setModels([]);
+                }
+            } else {
+                // თუ მწარმოებელი არ არის არჩეული, გავასუფთაოთ მოდელები
+                setModels([]);
+            }
+        };
+
+        loadModelsForSelectedManufacturers();
+    }, [selectedManufacturer]);
 
     // Filter manufacturers based on vehicle type
     const filteredManufacturers = manufacturers.filter((brand) => {

@@ -25,14 +25,14 @@ export const fetchCategories = async () => {
     }
 };
 
-
-// Update the fetchModels function in src/components/api.jsx
-// api.jsx ფაილში fetchModels ფუნქცია
+// განახლებული fetchModels ფუნქცია
 export const fetchModels = async (manId) => {
+    // თუ მწარმოებლის ID არ არის მითითებული, დავაბრუნოთ ცარიელი მასივი
     if (!manId || manId === "") {
-        console.error("მწარმოებლის ID არ არის მითითებული");
+        console.log("მწარმოებელი არ არის არჩეული");
         return [];
     }
+
     try {
         console.log(`მოდელების ჩატვირთვა მწარმოებლისთვის: ${manId}`);
         const response = await axios.get(`https://api2.myauto.ge/ka/getManModels?man_id=${manId}`);
@@ -48,15 +48,102 @@ export const fetchModels = async (manId) => {
                 category_id: model.category_id || ""
             }));
         }
+
         console.log("მოდელები ვერ მოიძებნა");
         return [];
     } catch (error) {
         console.error('მოდელების ჩატვირთვის შეცდომა:', error);
-        return []; // შეცდომის შემთხვევაში დავაბრუნოთ ცარიელი მასივი
+        return [];
     }
 };
 
+// ახალი ფუნქცია, რომელიც ჩატვირთავს მოდელებს მწარმოებლების მასივისთვის
+export const fetchModelsForManufacturers = async (manufacturerIds) => {
+    if (!manufacturerIds || manufacturerIds.length === 0) {
+        console.log("მწარმოებლები არ არის არჩეული");
+        return [];
+    }
 
+    try {
+        console.log(`მოდელების ჩატვირთვა ${manufacturerIds.length} მწარმოებლისთვის`);
+
+        // ყველა არჩეული მწარმოებლის მოდელების ჩატვირთვა პარალელურად
+        const modelPromises = manufacturerIds.map(manId =>
+            fetchModels(manId)
+        );
+
+        // ყველა მოდელის გაერთიანება
+        const allModelsArrays = await Promise.all(modelPromises);
+        const allModels = allModelsArrays.flat();
+
+        console.log(`ჩატვირთულია ${allModels.length} მოდელი არჩეული მწარმოებლებისთვის`);
+        return allModels;
+    } catch (error) {
+        console.error('მოდელების ჩატვირთვის შეცდომა:', error);
+        return [];
+    }
+};
+
+// ახალი ფუნქცია, რომელიც ჩატვირთავს პოპულარული მწარმოებლების მოდელებს
+export const fetchAllModels = async () => {
+    try {
+        // პოპულარული მწარმოებლების ID-ები
+        const popularManufacturerIds = [
+            "10", // BMW
+            "41", // Mercedes-Benz
+            "79", // Toyota
+            "88", // Volkswagen
+            "58", // Porsche
+            "38", // Lexus
+            "59", // Renault
+            "7",  // Audi
+            "22", // Ford
+            "37", // Land Rover
+            "56", // Opel
+            "60", // Nissan
+            "44", // Mitsubishi
+            "40", // Mazda
+            "29", // Hyundai
+            "31", // Jeep
+            "33", // Kia
+            "76", // Subaru
+            "28", // Honda
+            "6"   // Acura
+        ];
+
+        console.log("პოპულარული მწარმოებლების მოდელების ჩატვირთვა...");
+
+        // ყველა მწარმოებლის მოდელების ჩატვირთვა პარალელურად
+        const modelPromises = popularManufacturerIds.map(manId =>
+            axios.get(`https://api2.myauto.ge/ka/getManModels?man_id=${manId}`)
+                .then(response => {
+                    if (response.data && response.data.data) {
+                        return response.data.data.map(model => ({
+                            model_id: model.model_id,
+                            model_name: model.model_name,
+                            manufacturer_id: manId,
+                            category_id: model.category_id || ""
+                        }));
+                    }
+                    return [];
+                })
+                .catch(error => {
+                    console.error(`შეცდომა მწარმოებლის ${manId} მოდელების ჩატვირთვისას:`, error);
+                    return [];
+                })
+        );
+
+        // ყველა მოდელის გაერთიანება
+        const allModelsArrays = await Promise.all(modelPromises);
+        const allModels = allModelsArrays.flat();
+
+        console.log(`ჩატვირთულია ${allModels.length} მოდელი პოპულარული მწარმოებლებისთვის`);
+        return allModels;
+    } catch (error) {
+        console.error('ყველა მოდელის ჩატვირთვის შეცდომა:', error);
+        return [];
+    }
+};
 
 // Fetch car listings
 const API_URL = "https://api2.myauto.ge/ka/products/";
@@ -127,5 +214,3 @@ export const getModelName = async (manufacturerId, modelId) => {
         return "უცნობი მოდელი"; // Default to "Unknown model" on error
     }
 };
-
-
