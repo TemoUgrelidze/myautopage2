@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
 import SortDropdown from './SortDropdown';
@@ -377,32 +376,60 @@ const Main = ({
             </div>
 
             {/* ფავორიტების პანელი */}
-            {showFavoritesPanel && (
-                <div className="favorites-panel">
-                    <div className="favorites-panel-header">
-                        <h3>ჩემი ფავორიტები ({favorites.length})</h3>
-                        <button className="close-panel-btn" onClick={toggleFavoritesPanel}>
+{showFavoritesPanel && (
+    <div className="favorites-panel">
+        <div className="favorites-panel-header">
+            <h3>ჩემი ფავორიტები ({favorites.length})</h3>
+            <button className="close-panel-btn" onClick={toggleFavoritesPanel}>
+                <FaTimes />
+            </button>
+        </div>
+        <div className="favorites-list">
+            {favorites.length > 0 ? (
+                favorites.map(car => (
+                    <div key={car.car_id} className="favorite-car-card">
+                        <img
+                            src={car.photo ? `https://static.my.ge/myauto/photos/${car.photo}/thumbs/${car.car_id}_1.jpg?v=${car.photo_ver}` : '/default-car.jpg'}
+                            alt={getCarName(car.man_id, car.model_id)}
+                            className="favorite-car-image"
+                            loading="lazy"
+                            onError={(e) => {
+                                e.target.src = '/default-car.jpg';
+                                e.target.onerror = null;
+                            }}
+                        />
+                        <div className="favorite-car-info">
+                            <h3 className="favorite-car-title">{getCarName(car.man_id, car.model_id)}</h3>
+                            <p className="favorite-car-price">
+                                {Number(currency === 'GEL'
+                                    ? (parseFloat(car.price_usd || 0) * exchangeRate)
+                                    : parseFloat(car.price_usd || 0)).toLocaleString()}
+                                {currency === 'GEL' ? '₾' : '$'}
+                            </p>
+                        </div>
+                        <button
+                            className="favorite-remove-btn"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("წაშლის ღილაკი დაჭერილია მანქანისთვის:", car.car_id);
+                                toggleFavorite(car);
+                            }}
+                        >
                             <FaTimes />
                         </button>
                     </div>
-                    <div className="favorites-list">
-                        {favorites.length > 0 ? (
-                            favorites.map(car => (
-                                <FavoriteCarCard
-                                    key={car.car_id}
-                                    car={car}
-                                    onRemove={toggleFavorite}
-                                />
-                            ))
-                        ) : (
-                            <div className="empty-favorites">
-                                <p>ფავორიტები ცარიელია</p>
-                                <p>დააჭირეთ გულის ღილაკს მანქანის დასამატებლად</p>
-                            </div>
-                        )}
-                    </div>
+                ))
+            ) : (
+                <div className="empty-favorites">
+                    <p>ფავორიტები ცარიელია</p>
+                    <p>დააჭირეთ გულის ღილაკს მანქანის დასამატებლად</p>
                 </div>
             )}
+        </div>
+    </div>
+)}
+
 
             {activeTab === 'favorites' && (
                 <div className="header-container">

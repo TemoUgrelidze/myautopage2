@@ -1,7 +1,6 @@
-
 import axios from "axios";
 
-// Fetch manufacturers
+
 export const fetchManufacturers = async () => {
     try {
         const response = await axios.get("https://static.my.ge/myauto/js/mans.json");

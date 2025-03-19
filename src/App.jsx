@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import "./App.css";
 import SideBar from "./components/SideBar.jsx";
@@ -19,12 +18,10 @@ function App() {
     const [currency, setCurrency] = useState("GEL");
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
-    // ფავორიტების სახელმწიფო
     const [favorites, setFavorites] = useState([]);
-    // აქტიური ტაბის სახელმწიფო (ძებნა ან ფავორიტები)
     const [activeTab, setActiveTab] = useState("search");
 
-    // ფავორიტების ჩატვირთვა localStorage-დან
+    // ფავორიტების ჩატვირთვა
     useEffect(() => {
         const savedFavorites = localStorage.getItem('favorites');
         if (savedFavorites) {
@@ -133,31 +130,39 @@ function App() {
         }
     };
 
+
     // ფავორიტებში დამატება/წაშლის ფუნქცია
-    const toggleFavorite = (car) => {
-        setFavorites(prevFavorites => {
-            // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
-            const isAlreadyFavorite = prevFavorites.some(fav => fav.car_id === car.car_id);
+const toggleFavorite = (car) => {
+    console.log(" მანქანისთვის:", car.car_id);
 
-            if (isAlreadyFavorite) {
-                // თუ უკვე ფავორიტებშია, წავშალოთ
-                return prevFavorites.filter(fav => fav.car_id !== car.car_id);
-            } else {
-                // თუ არ არის ფავორიტებში, დავამატოთ
-                return [...prevFavorites, car];
-            }
-        });
-    };
+    setFavorites(prevFavorites => {
+        // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
+        const isAlreadyFavorite = prevFavorites.some(fav => String(fav.car_id) === String(car.car_id));
+        console.log("უკვე ფავორიტებშია?", isAlreadyFavorite);
 
-    // შევამოწმოთ არის თუ არა მანქანა ფავორიტებში
-    const isFavorite = (carId) => {
-        return favorites.some(fav => fav.car_id === carId);
-    };
+        let newFavorites;
+        if (isAlreadyFavorite) {
+            // თუ უკვე ფავორიტებშია, წავშალოთ
+            newFavorites = prevFavorites.filter(fav => String(fav.car_id) !== String(car.car_id));
+            console.log("წაშლილია ფავორიტებიდან");
+        } else {
+            // თუ არ არის ფავორიტებში, დავამატოთ
+            newFavorites = [...prevFavorites, car];
+            console.log("დამატებულია ფავორიტებში");
+        }
 
-    // ფავორიტების ტაბზე გადასვლა
+        // შევინახოთ ახალი ფავორიტები localStorage-ში
+        localStorage.setItem('favorites', JSON.stringify(newFavorites));
+        return newFavorites;
+    });
+};
 
+// შევამოწმოთ არის თუ არა მანქანა ფავორიტებში
+const isFavorite = (carId) => {
+    if (!carId) return false;
+    return favorites.some(fav => String(fav.car_id) === String(carId));
+};
 
-    // ძებნის ტაბზე გადასვლა
 
 
     return (
