@@ -1,4 +1,4 @@
-// SortDropdown.jsx
+
 import React, { useState, useRef, useEffect } from 'react';
 
 const SortDropdown = ({ onSort }) => {
@@ -6,7 +6,7 @@ const SortDropdown = ({ onSort }) => {
     const dropdownRef = useRef(null);
 
     const sortOptions = [
-        { id: 'price-desc', name: 'ფასი: ძვირიდან იაფისკენნნ', value: { field: 'price', order: 'desc' } },
+        { id: 'price-desc', name: 'ფასი: ძვირიდან იაფისკენნ', value: { field: 'price', order: 'desc' } },
         { id: 'price-asc', name: 'ფასი: იაფიდან ძვირისკენ', value: { field: 'price', order: 'asc' } },
         { id: 'date-desc', name: 'თარიღი: ახლიდან ძველისკენ', value: { field: 'date', order: 'desc' } },
         { id: 'date-asc', name: 'თარიღი: ძველიდან ახლისკენ', value: { field: 'date', order: 'asc' } },

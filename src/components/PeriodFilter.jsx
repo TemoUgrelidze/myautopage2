@@ -1,4 +1,4 @@
-// src/components/PeriodFilter.jsx
+
 import React, { useState, useRef, useEffect } from 'react';
 
 const PeriodFilter = ({ onPeriodChange }) => {

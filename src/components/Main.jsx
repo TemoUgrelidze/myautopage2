@@ -1,9 +1,18 @@
+
 import React, { useEffect, useState } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
 import SortDropdown from './SortDropdown';
 import PeriodFilter from './PeriodFilter';
+import { FaHeart, FaEye, FaMapMarkerAlt, FaCheckCircle, FaTimes } from 'react-icons/fa';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 
-const Main = ({ searchResults, isSearched }) => {
+const Main = ({
+                  searchResults,
+                  isSearched,
+                  toggleFavorite,
+                  isFavorite,
+                  activeTab
+              }) => {
     const [cars, setCars] = useState([]);
     const [manufacturers, setManufacturers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,13 +22,58 @@ const Main = ({ searchResults, isSearched }) => {
     const [currency, setCurrency] = useState(() => {
         return localStorage.getItem('preferredCurrency') || 'GEL';
     });
+    const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
+    const [favorites, setFavorites] = useState([]);
     const exchangeRate = 2.65;
+
+    // ფავორიტების ჩატვირთვა localStorage-დან
+    useEffect(() => {
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+            try {
+                setFavorites(JSON.parse(savedFavorites));
+            } catch (error) {
+                console.error("Error loading favorites from localStorage:", error);
+                setFavorites([]);
+            }
+        }
+    }, []);
+
+    // ფავორიტების განახლება როცა toggleFavorite გამოიძახება
+    useEffect(() => {
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+            try {
+                setFavorites(JSON.parse(savedFavorites));
+            } catch (error) {
+                console.error("Error loading favorites from localStorage:", error);
+            }
+        }
+    }, [isFavorite]); // isFavorite-ს გამოყენება დამოკიდებულებად, რადგან ის იცვლება როცა toggleFavorite გამოიძახება
 
     const categoryMapping = {
         "1": "სედანი", "2": "კუპე", "3": "ჯიპი",
         "4": "უნივერსალი", "5": "ჰეჩბექი", "6": "მინივენი",
         "7": "მიკროავტობუსი", "8": "პიკაპი",
         "9": "კაბრიოლეტი", "10": "ფურგონი"
+    };
+
+    const transmissionTypes = {
+        "1": "მექანიკა",
+        "2": "ავტომატიკა",
+        "3": "ტიპტრონიკი",
+        "4": "ვარიატორი"
+    };
+
+    const fuelTypes = {
+        "2": "ბენზინი",
+        "3": "დიზელი",
+        "4": "ელექტრო",
+        "5": "ჰიბრიდი",
+        "6": "ბუნებრივი გაზი",
+        "7": "თხევადი გაზი",
+        "8": "წყალბადი",
+        "9": "პლაგინ ჰიბრიდი"
     };
 
     useEffect(() => {
@@ -125,7 +179,15 @@ const Main = ({ searchResults, isSearched }) => {
         return modelName ? `${manufacturer.name} ${modelName}` : manufacturer.name;
     }, [manufacturerData]);
 
+    // ფავორიტების პანელის გახსნა/დახურვა
+    const toggleFavoritesPanel = () => {
+        setShowFavoritesPanel(!showFavoritesPanel);
+    };
+
     const CarCard = React.memo(({ car }) => {
+        // ვიყენებთ გლობალურ isFavorite ფუნქციას
+        const carIsFavorite = isFavorite && isFavorite(car.car_id);
+
         if (!car) return null;
         const carName = getCarName(car.man_id, car.model_id);
         const imageUrl = car.photo
@@ -133,7 +195,6 @@ const Main = ({ searchResults, isSearched }) => {
             : '/default-car.jpg';
 
         let gelPrice, usdPrice;
-
         if (car.price_usd) {
             usdPrice = parseFloat(car.price_usd);
             gelPrice = Math.round(usdPrice * exchangeRate);
@@ -142,29 +203,125 @@ const Main = ({ searchResults, isSearched }) => {
             usdPrice = Math.round(gelPrice / exchangeRate);
         }
 
+        const getLocationText = () => {
+            const locations = {
+                0: 'თბილისი',
+                1: 'ქუთაისი',
+                2: 'რუსთავის ავტობაზრობა',
+                3: 'ამერიკა',
+                4: 'ევროპა',
+                5: 'დუბაი'
+            };
+
+            if (car.car_status === 2) return 'გზაში';
+            if (car.customs_passed) {
+                return locations[car.location_id] || 'საქართველო';
+            }
+            return locations[car.location_id] || 'საზღვარგარეთ';
+        };
+
+        const calculateCustomsDuty = () => {
+            if (car.customs_passed) return 0;
+
+            const currentYear = new Date().getFullYear();
+            const carAge = currentYear - car.prod_year;
+            const engineVolume = car.engine_volume / 1000;
+            let basePrice = parseFloat(car.price_usd) || 0;
+
+            if (car.fuel_type_id === 5) {
+                return Math.round(basePrice * (carAge <= 6 ? 0.05 : 0.095));
+            }
+
+            if (car.fuel_type_id === 4) return 0;
+
+            let excise = engineVolume * ((carAge + 1) * 50);
+            let importTax = basePrice * 0.12;
+            let vat = (basePrice + excise + importTax) * 0.18;
+
+            return Math.round(excise + importTax + vat);
+        };
+
+        const customsDutyAmount = calculateCustomsDuty();
+        const locationText = getLocationText();
+
         const primaryPrice = currency === 'GEL' ? gelPrice : usdPrice;
         const secondaryPrice = currency === 'GEL' ? usdPrice : gelPrice;
         const primarySymbol = currency === 'GEL' ? '₾' : '$';
         const secondarySymbol = currency === 'GEL' ? '$' : '₾';
 
+        const engineVolume = car.engine_volume
+            ? `${(car.engine_volume / 1000).toFixed(1)}L`
+            : '';
+
         return (
             <div className="car-card">
                 <div className="car-image-container">
-                    <img src={imageUrl} alt={carName} className="car-image" loading="lazy"
-                         onError={(e) => { e.target.src = '/default-car.jpg'; e.target.onerror = null; }}
+                    <img
+                        src={imageUrl}
+                        alt={carName}
+                        className="car-image"
+                        loading="lazy"
+                        onError={(e) => {
+                            e.target.src = '/default-car.jpg';
+                            e.target.onerror = null;
+                        }}
                     />
+                    {/* დაგულების ღილაკი */}
+                    <button
+                        className={`favorite-button ${carIsFavorite ? 'active' : ''}`}
+                        onClick={() => toggleFavorite && toggleFavorite(car)}
+                    >
+                        <FaHeart />
+                    </button>
+                    {/* მდებარეობის ბეჯი */}
+                    <div className="location-badge">
+                        <FaMapMarkerAlt />
+                        <span>{locationText}</span>
+                    </div>
                 </div>
                 <div className="car-info">
                     <h2 className="car-title">
                         {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} წ` : ''}</span>
                     </h2>
                     <p className="car-category">{categoryMapping[car.category_id] || "სხვა"}</p>
-                    <p className="car-details">
-                        {car.engine_volume && <span className="engine">🚗 {car.engine_volume}</span>}
-                        {car.fuel_type && <span className="fuel">⛽ {car.fuel_type}</span>}
-                        {car.gear_type && <span className="gear">⚙️ {car.gear_type}</span>}
-                        {car.car_run_km && <span className="mileage">📍 {car.car_run_km} კმ</span>}
-                    </p>
+
+                    <div className="car-specs">
+                        <div className="specs-row">
+                            <span className="spec-item">
+                                <i className="spec-icon">🚘</i>
+                                {car.right_wheel ? "მარჯვენა" : "მარცხენა"} საჭე
+                            </span>
+                            <span className="spec-item">
+                                <i className="spec-icon">⚙️</i>
+                                {transmissionTypes[car.gear_type_id] || "გადაცემათა კოლოფი"}
+                            </span>
+                        </div>
+                        <div className="specs-row">
+                            <span className="spec-item">
+                                <i className="spec-icon">🔧</i>
+                                {engineVolume} {fuelTypes[car.fuel_type_id] || ""}
+                            </span>
+                            <span className="spec-item">
+                                <i className="spec-icon">📍</i>
+                                {car.car_run_km?.toLocaleString()} კმ
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="customs-info">
+                        {car.customs_passed ? (
+                            <div className="customs-passed">
+                                <FaCheckCircle />
+                                <span>განბაჟებული</span>
+                            </div>
+                        ) : (
+                            <div className="customs-duty">
+                                <RiMoneyDollarCircleLine />
+                                <span>განბაჟება: {customsDutyAmount} $</span>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="car-price-section">
                         <div className="price-and-currency">
                             <div className="prices">
@@ -191,6 +348,7 @@ const Main = ({ searchResults, isSearched }) => {
                             </div>
                         </div>
                     </div>
+
                     {car.for_rent === "1" && <span className="rental-badge">ქირავდება</span>}
                 </div>
             </div>
@@ -207,17 +365,66 @@ const Main = ({ searchResults, isSearched }) => {
 
     return (
         <div className="main-container">
+            {/* ფავორიტების ღილაკი მარჯვენა ზედა კუთხეში */}
+            <div className="favorites-button-container">
+                <button
+                    className={`favorites-toggle-button ${showFavoritesPanel ? 'active' : ''}`}
+                    onClick={toggleFavoritesPanel}
+                >
+                    <FaHeart />
+                    <span className="favorites-count">{favorites.length}</span>
+                </button>
+            </div>
+
+            {/* ფავორიტების პანელი */}
+            {showFavoritesPanel && (
+                <div className="favorites-panel">
+                    <div className="favorites-panel-header">
+                        <h3>ჩემი ფავორიტები ({favorites.length})</h3>
+                        <button className="close-panel-btn" onClick={toggleFavoritesPanel}>
+                            <FaTimes />
+                        </button>
+                    </div>
+                    <div className="favorites-list">
+                        {favorites.length > 0 ? (
+                            favorites.map(car => (
+                                <FavoriteCarCard
+                                    key={car.car_id}
+                                    car={car}
+                                    onRemove={toggleFavorite}
+                                />
+                            ))
+                        ) : (
+                            <div className="empty-favorites">
+                                <p>ფავორიტები ცარიელია</p>
+                                <p>დააჭირეთ გულის ღილაკს მანქანის დასამატებლად</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'favorites' && (
+                <div className="header-container">
+                    <div className="results-count">
+                        ფავორიტები: {sortedCars.length} მანქანა
+                    </div>
+                </div>
+            )}
+
             {sortedCars && sortedCars.length > 0 ? (
                 <>
-                    <div className="header-container">
-                        <div className="results-count">
-                            ნაპოვნია: {sortedCars.length} განცხადება
+                    {activeTab === 'search' && (
+                        <div className="header-container">
+                            <div className="results-count">
+                                ნაპოვნია: {sortedCars.length} განცხადება
+                            </div>
+                            <div className="filters-container">
+                                <PeriodFilter onPeriodChange={handlePeriodChange} />
+                                <SortDropdown onSort={handleSort} />
+                            </div>
                         </div>
-                        <div className="filters-container">
-                            <PeriodFilter onPeriodChange={handlePeriodChange} />
-                            <SortDropdown onSort={handleSort} />
-                        </div>
-                    </div>
+                    )}
 
                     <div className="cars-grid">
                         {sortedCars.map((car) => (
@@ -231,9 +438,11 @@ const Main = ({ searchResults, isSearched }) => {
             ) : (
                 <div className="no-results-container">
                     <p className="no-results">
-                        {isSearched
-                            ? "🔍 არჩეული პარამეტრებით მანქანა ვერ მოიძებნა"
-                            : "🚗 მანქანები არ მოიძებნა"}
+                        {activeTab === 'favorites'
+                            ? "❤️ ფავორიტები ცარიელია"
+                            : isSearched
+                                ? "🔍 არჩეული პარამეტრებით მანქანა ვერ მოიძებნა"
+                                : "🚗 მანქანები არ მოიძებნა"}
                     </p>
                 </div>
             )}
@@ -242,3 +451,7 @@ const Main = ({ searchResults, isSearched }) => {
 };
 
 export default React.memo(Main);
+
+
+
+
