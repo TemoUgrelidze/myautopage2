@@ -178,13 +178,11 @@ const Main = ({
         return modelName ? `${manufacturer.name} ${modelName}` : manufacturer.name;
     }, [manufacturerData]);
 
-    // ფავორიტების პანელის გახსნა/დახურვა
     const toggleFavoritesPanel = () => {
         setShowFavoritesPanel(!showFavoritesPanel);
     };
 
     const CarCard = React.memo(({ car }) => {
-        // ვიყენებთ გლობალურ isFavorite ფუნქციას
         const carIsFavorite = isFavorite && isFavorite(car.car_id);
 
         if (!car) return null;
