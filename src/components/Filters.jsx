@@ -16,9 +16,6 @@ const Select = React.memo(({
         isMultiSelect ? (Array.isArray(value) ? value : []) : value
     );
 
-
-
-
     // Update selectedItems when value changes from outside
     useEffect(() => {
         if (isMultiSelect) {
@@ -207,11 +204,11 @@ const Filters = ({
         "4": "უნივერსალი",
     };
 
-
-    //  useEffect მოდელების ფილტრაციისთვის
+    // განახლებული useEffect მოდელების ფილტრაციისთვის
+    // განახლებული useEffect მოდელების ფილტრაციისთვის
     useEffect(() => {
         const filterModelsByCategory = () => {
-            console.log("მოდელები:", models);
+            console.log("მოდელები:", models); // დავამატოთ ლოგი დებაგისთვის
 
             // თუ მოდელების მასივი ცარიელია, დავაბრუნოთ ცარიელი მასივი
             if (!models || models.length === 0) {
@@ -473,4 +470,3 @@ PriceRangeInput.propTypes = {
 };
 
 export default React.memo(Filters);
-
