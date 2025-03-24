@@ -1,5 +1,7 @@
-import React, { useMemo, useCallback, useEffect, useState } from "react";
+// src/components/Filters.jsx
+import React, { useMemo, useCallback, useEffect, useState, useContext } from "react";
 import PropTypes from 'prop-types';
+import { LanguageContext } from '../contexts/LanguageContext';
 
 const Select = React.memo(({
                                label,
@@ -10,6 +12,7 @@ const Select = React.memo(({
                                defaultOption = "ყველა",
                                isMultiSelect = false
                            }) => {
+    const { t } = useContext(LanguageContext);
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedItems, setSelectedItems] = useState(
@@ -64,7 +67,7 @@ const Select = React.memo(({
                     >
                         <span>
                             {Array.isArray(selectedItems) && selectedItems.length > 0
-                                ? `არჩეულია ${selectedItems.length}`
+                                ? `${t('common.selected')} ${selectedItems.length}`
                                 : defaultOption}
                         </span>
                         <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
@@ -75,7 +78,7 @@ const Select = React.memo(({
                             <input
                                 type="text"
                                 className="search-input"
-                                placeholder="ძებნა..."
+                                placeholder={t('common.search')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
@@ -93,7 +96,7 @@ const Select = React.memo(({
                                     </label>
                                 ))}
                                 {filteredOptions.length === 0 && (
-                                    <div className="no-results">შედეგები არ მოიძებნა</div>
+                                    <div className="no-results">{t('common.noResults')}</div>
                                 )}
                             </div>
                         </div>
@@ -148,7 +151,7 @@ const Select = React.memo(({
                             ))}
 
                             {options.length === 0 && (
-                                <div className="no-results">შედეგები არ მოიძებნა</div>
+                                <div className="no-results">{t('common.noResults')}</div>
                             )}
                         </div>
                     </div>
@@ -194,17 +197,16 @@ const Filters = ({
                      currency,
                      setCurrency
                  }) => {
-
+    const { t } = useContext(LanguageContext);
     const [filteredModels, setFilteredModels] = useState([]);
 
     const categoryModelMapping = {
-        "1": "სედანი",
-        "2": "კუპე",
-        "3": "ჯიპი",
-        "4": "უნივერსალი",
+        "1": t('car.categories.sedan'),
+        "2": t('car.categories.coupe'),
+        "3": t('car.categories.jeep'),
+        "4": t('car.categories.universal'),
     };
 
-    // განახლებული useEffect მოდელების ფილტრაციისთვის
     // განახლებული useEffect მოდელების ფილტრაციისთვის
     useEffect(() => {
         const filterModelsByCategory = () => {
@@ -255,9 +257,9 @@ const Filters = ({
 
 
     const saleTypeOptions = useMemo(() => [
-        {id: "1", name: "იყიდება"},
-        {id: "2", name: "ქირავდება"}
-    ], []);
+        {id: "1", name: t('filters.forSale')},
+        {id: "2", name: t('filters.forRent')}
+    ], [t]);
 
     const manufacturerOptions = useMemo(() =>
             manufacturers.map(brand => ({
@@ -272,7 +274,7 @@ const Filters = ({
                 id: cat.category_id,
                 name: categoryModelMapping[cat.category_id] || cat.title
             })) : [],
-        [categories]
+        [categories, categoryModelMapping]
     );
 
     const handleSaleTypeChange = useCallback((e) => {
@@ -336,46 +338,46 @@ const Filters = ({
     return (
         <div className="properties">
             <Select
-                label="გარიგების ტიპი"
+                label={t('filters.dealType')}
                 className="sale-type"
                 value={saleType}
                 onChange={handleSaleTypeChange}
                 options={saleTypeOptions}
-                defaultOption="აირჩიეთ გარიგების ტიპი"
+                defaultOption={t('filters.selectDealType')}
             />
 
             <Select
-                label="მწარმოებელი"
+                label={t('filters.manufacturer')}
                 className="model"
                 value={selectedManufacturer}
                 onChange={handleManufacturerChange}
                 options={manufacturerOptions}
-                defaultOption="ყველა მწარმოებელი"
+                defaultOption={t('filters.allManufacturers')}
                 isMultiSelect={true}
             />
 
             <Select
-                label="კატეგორია"
+                label={t('filters.category')}
                 className="category"
                 value={category}
                 onChange={handleCategoryChange}
                 options={categoryOptions}
-                defaultOption="ყველა კატეგორია"
+                defaultOption={t('filters.allCategories')}
             />
 
             <Select
-                label="მოდელი"
+                label={t('filters.model')}
                 className="models"
                 value={selectedModel}
                 onChange={handleModelChange}
                 options={filteredModels}
                 disabled={false}
-                defaultOption="ყველა მოდელი"
+                defaultOption={t('filters.allModels')}
             />
 
             <div className="price-range">
                 <div className="price-header">
-                    <label>ფასი</label>
+                    <label>{t('filters.price')}</label>
                     <button
                         className="currency-toggle-btn"
                         onClick={handleCurrencyChange}
@@ -388,7 +390,7 @@ const Filters = ({
                         className="price-input"
                         value={minPrice}
                         onChange={handleMinPriceChange}
-                        placeholder="დან"
+                        placeholder={t('filters.from')}
                         currency={currency}
                     />
                     <span className="price-separator">-</span>
@@ -396,7 +398,7 @@ const Filters = ({
                         className="price-input"
                         value={maxPrice}
                         onChange={handleMaxPriceChange}
-                        placeholder="მდე"
+                        placeholder={t('filters.to')}
                         currency={currency}
                     />
                 </div>

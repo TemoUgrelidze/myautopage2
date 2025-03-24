@@ -1,10 +1,12 @@
 // src/components/Guest.jsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { LanguageContext } from '../contexts/LanguageContext';
 
 const Guest = () => {
     const navigate = useNavigate();
+    const { t } = useContext(LanguageContext);
 
     const handleRegistration = () => {
         navigate('/login');
@@ -14,7 +16,7 @@ const Guest = () => {
         <div className="guest-button-container">
             <button className="guest-button" onClick={handleRegistration}>
                 <FaUser className="guest-icon" />
-                <span>შესვლა</span>
+                <span>{t('common.login')}</span>
             </button>
         </div>
     );

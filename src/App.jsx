@@ -5,7 +5,8 @@ import SideBar from './components/SideBar';
 import Main from './components/Main';
 import Guest from './components/Guest';
 import Login from './components/Login';
-
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
@@ -155,50 +156,53 @@ function App() {
         return favorites.some(fav => String(fav.car_id) === String(carId));
     };
 
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={
-                    <div className="app-container">
-                        <Guest />
-                        <SideBar
-                            setVehicleType={setVehicleType}
-                            saleType={saleType}
-                            setSaleType={setSaleType}
-                            selectedManufacturer={selectedManufacturer}
-                            setSelectedManufacturer={setSelectedManufacturer}
-                            category={category}
-                            setCategory={setCategory}
-                            manufacturers={filteredManufacturers}
-                            categories={filteredCategories}
-                            models={models}
-                            setModels={setModels}
-                            selectedModel={selectedModel}
-                            setSelectedModel={setSelectedModel}
-                            minPrice={minPrice}
-                            setMinPrice={setMinPrice}
-                            maxPrice={maxPrice}
-                            setMaxPrice={setMaxPrice}
-                            currency={currency}
-                            setCurrency={setCurrency}
-                            onSearch={handleSearch}
-                        />
-                        <Main
-                            selectedManufacturer={selectedManufacturer}
-                            selectedModel={selectedModel}
-                            category={category}
-                            searchResults={activeTab === "search" ? searchResults : favorites}
-                            isSearched={isSearched}
-                            toggleFavorite={toggleFavorite}
-                            isFavorite={isFavorite}
-                            activeTab={activeTab}
-                        />
-                    </div>
-                } />
-            </Routes>
-        </BrowserRouter>
-    );
-}
+        return (
+            <LanguageProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/" element={
+                            <div className="app-container">
+                                <Guest />
+                                <LanguageSwitcher />
+                                <SideBar
+                                    setVehicleType={setVehicleType}
+                                    saleType={saleType}
+                                    setSaleType={setSaleType}
+                                    selectedManufacturer={selectedManufacturer}
+                                    setSelectedManufacturer={setSelectedManufacturer}
+                                    category={category}
+                                    setCategory={setCategory}
+                                    manufacturers={filteredManufacturers}
+                                    categories={filteredCategories}
+                                    models={models}
+                                    setModels={setModels}
+                                    selectedModel={selectedModel}
+                                    setSelectedModel={setSelectedModel}
+                                    minPrice={minPrice}
+                                    setMinPrice={setMinPrice}
+                                    maxPrice={maxPrice}
+                                    setMaxPrice={setMaxPrice}
+                                    currency={currency}
+                                    setCurrency={setCurrency}
+                                    onSearch={handleSearch}
+                                />
+                                <Main
+                                    selectedManufacturer={selectedManufacturer}
+                                    selectedModel={selectedModel}
+                                    category={category}
+                                    searchResults={activeTab === "search" ? searchResults : favorites}
+                                    isSearched={isSearched}
+                                    toggleFavorite={toggleFavorite}
+                                    isFavorite={isFavorite}
+                                    activeTab={activeTab}
+                                />
+                            </div>
+                        } />
+                    </Routes>
+                </BrowserRouter>
+            </LanguageProvider>
+        );
+    }
 
-export default App;
+    export default App;
