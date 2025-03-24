@@ -10,7 +10,6 @@ const Guest = () => {
         navigate('/login');
     };
 
-
     return (
         <div className="guest-button-container">
             <button className="guest-button" onClick={handleRegistration}>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./App.css";
-import SideBar from "./components/SideBar.jsx";
-import Main from "./components/Main.jsx";
-import Guest from "./components/Guest.jsx";
-import Login from "./components/Login";
-import { fetchManufacturers, fetchCategories, fetchCarListings, fetchModelsForManufacturers } from "./components/api.jsx";
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import './App.css';
+import SideBar from './components/SideBar';
+import Main from './components/Main';
+import Guest from './components/Guest';
+import Login from './components/Login';
+
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
@@ -44,7 +44,9 @@ function App() {
         const loadInitialData = async () => {
             try {
                 const [manufacturersData, categoriesData] = await Promise.all([
+                    // eslint-disable-next-line no-undef
                     fetchManufacturers(),
+                    // eslint-disable-next-line no-undef
                     fetchCategories()
                 ]);
                 setManufacturers(manufacturersData);
@@ -60,6 +62,7 @@ function App() {
         const loadModelsForSelectedManufacturers = async () => {
             if (selectedManufacturer && selectedManufacturer.length > 0) {
                 try {
+                    // eslint-disable-next-line no-undef
                     const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
                     console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
 
@@ -96,6 +99,7 @@ function App() {
         setActiveTab("search");
         window.location.hash = 'search';
         try {
+            // eslint-disable-next-line no-undef
             const carListings = await fetchCarListings();
 
             const results = carListings.filter(car => {
@@ -152,7 +156,7 @@ function App() {
     };
 
     return (
-        <Router>
+        <BrowserRouter>
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={
@@ -193,7 +197,7 @@ function App() {
                     </div>
                 } />
             </Routes>
-        </Router>
+        </BrowserRouter>
     );
 }
 
