@@ -1,5 +1,5 @@
+// src/components/api.jsx
 import axios from "axios";
-
 
 export const fetchManufacturers = async () => {
     try {

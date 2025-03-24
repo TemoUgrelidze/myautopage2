@@ -1,59 +1,48 @@
-import React, { useState, useRef, useEffect } from 'react';
+// src/components/PeriodFilter.jsx
+import React, { useState, useContext } from 'react';
+import { FaClock } from 'react-icons/fa';
+import { LanguageContext } from '../contexts/LanguageContext';
 
 const PeriodFilter = ({ onPeriodChange }) => {
+    const { t } = useContext(LanguageContext);
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
+    const [selectedPeriod, setSelectedPeriod] = useState(t('period.all'));
 
     const periodOptions = [
-        { id: '1h', name: '1 საათი', value: 1 },
-        { id: '3h', name: '3 საათი', value: 3 },
-        { id: '6h', name: '6 საათი', value: 6 },
-        { id: '12h', name: '12 საათი', value: 12 },
-        { id: '24h', name: '24 საათი', value: 24 },
+        { label: t('period.all'), hours: null },
+        { label: t('period.last1h'), hours: 1 },
+        { label: t('period.last2h'), hours: 2 },
+        { label: t('period.last3h'), hours: 3 },
+        { label: t('period.last12h'), hours: 12 },
+        { label: t('period.last24h'), hours: 24 },
+        { label: t('period.last3d'), hours: 72 }
     ];
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
+    };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handlePeriodSelect = (hours) => {
-        onPeriodChange(hours);
+    const handleOptionClick = (option) => {
+        setSelectedPeriod(option.label);
+        onPeriodChange(option.hours);
         setIsOpen(false);
     };
 
     return (
-        <div className="period-dropdown" ref={dropdownRef}>
-            <button
-                className="period-button"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                <span>პერიოდი</span>
-                <svg
-                    className={`period-icon ${isOpen ? 'open' : ''}`}
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                >
-                    <path d="M8 11L3 6h10l-5 5z" fill="currentColor"/>
-                </svg>
+        <div className="period-dropdown">
+            <button className="period-button" onClick={toggleDropdown}>
+                <span>{selectedPeriod}</span>
+                <FaClock className={`period-icon ${isOpen ? 'open' : ''}`} />
             </button>
-
             {isOpen && (
                 <div className="period-options">
-                    {periodOptions.map((option) => (
+                    {periodOptions.map((option, index) => (
                         <button
-                            key={option.id}
+                            key={index}
                             className="period-option"
-                            onClick={() => handlePeriodSelect(option.value)}
+                            onClick={() => handleOptionClick(option)}
                         >
-                            {option.name}
+                            {option.label}
                         </button>
                     ))}
                 </div>

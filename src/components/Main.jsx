@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+// src/components/Main.jsx
+import React, { useEffect, useState, useContext } from "react";
 import { fetchCarListings, fetchManufacturers } from "./api.jsx";
 import SortDropdown from './SortDropdown';
 import PeriodFilter from './PeriodFilter';
 import { FaHeart, FaEye, FaMapMarkerAlt, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+import { LanguageContext } from '../contexts/LanguageContext';
 
 const Main = ({
                   searchResults,
@@ -12,6 +14,7 @@ const Main = ({
                   isFavorite,
                   activeTab
               }) => {
+    const { t } = useContext(LanguageContext);
     const [cars, setCars] = useState([]);
     const [manufacturers, setManufacturers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -49,31 +52,6 @@ const Main = ({
             }
         }
     }, [isFavorite]); // isFavorite-ს გამოყენება დამოკიდებულებად, რადგან ის იცვლება როცა toggleFavorite გამოიძახება
-
-    const categoryMapping = {
-        "1": "სედანი", "2": "კუპე", "3": "ჯიპი",
-        "4": "უნივერსალი", "5": "ჰეჩბექი", "6": "მინივენი",
-        "7": "მიკროავტობუსი", "8": "პიკაპი",
-        "9": "კაბრიოლეტი", "10": "ფურგონი"
-    };
-
-    const transmissionTypes = {
-        "1": "მექანიკა",
-        "2": "ავტომატიკა",
-        "3": "ტიპტრონიკი",
-        "4": "ვარიატორი"
-    };
-
-    const fuelTypes = {
-        "2": "ბენზინი",
-        "3": "დიზელი",
-        "4": "ელექტრო",
-        "5": "ჰიბრიდი",
-        "6": "ბუნებრივი გაზი",
-        "7": "თხევადი გაზი",
-        "8": "წყალბადი",
-        "9": "პლაგინ ჰიბრიდი"
-    };
 
     useEffect(() => {
         let ignore = false;
@@ -171,12 +149,12 @@ const Main = ({
     };
 
     const getCarName = React.useCallback((manId, modelId) => {
-        if (!manId || !manufacturerData[manId]) return "მწარმოებელი არ არის მითითებული";
+        if (!manId || !manufacturerData[manId]) return t('car.unknownManufacturer');
         const manufacturer = manufacturerData[manId];
-        if (!manufacturer) return "მწარმოებელი არ არის მითითებული";
+        if (!manufacturer) return t('car.unknownManufacturer');
         const modelName = modelId && manufacturer.models && manufacturer.models[modelId];
         return modelName ? `${manufacturer.name} ${modelName}` : manufacturer.name;
-    }, [manufacturerData]);
+    }, [manufacturerData, t]);
 
     // ფავორიტების პანელის გახსნა/დახურვა
     const toggleFavoritesPanel = () => {
@@ -203,20 +181,19 @@ const Main = ({
         }
 
         const getLocationText = () => {
-            const locations = {
-                0: 'თბილისი',
-                1: 'ქუთაისი',
-                2: 'რუსთავის ავტობაზრობა',
-                3: 'ამერიკა',
-                4: 'ევროპა',
-                5: 'დუბაი'
-            };
+            const locationId = car.location_id;
 
-            if (car.car_status === 2) return 'გზაში';
+            if (car.car_status === 2) return t('car.location.inTransit');
             if (car.customs_passed) {
-                return locations[car.location_id] || 'საქართველო';
+                if (locationId === 0) return t('car.location.tbilisi');
+                if (locationId === 1) return t('car.location.kutaisi');
+                if (locationId === 2) return t('car.location.rustavi');
+                if (locationId === 3) return t('car.location.america');
+                if (locationId === 4) return t('car.location.europe');
+                if (locationId === 5) return t('car.location.dubai');
+                return t('car.location.georgia');
             }
-            return locations[car.location_id] || 'საზღვარგარეთ';
+            return t('car.location.abroad');
         };
 
         const calculateCustomsDuty = () => {
@@ -252,6 +229,58 @@ const Main = ({
             ? `${(car.engine_volume / 1000).toFixed(1)}L`
             : '';
 
+        // Get category name based on language
+        const getCategoryName = (categoryId) => {
+            if (!categoryId) return t('car.categories.other');
+
+            const categoryKey = {
+                "1": "sedan",
+                "2": "coupe",
+                "3": "jeep",
+                "4": "universal",
+                "5": "hatchback",
+                "6": "minivan",
+                "7": "microbus",
+                "8": "pickup",
+                "9": "cabriolet",
+                "10": "van"
+            }[categoryId];
+
+            return categoryKey ? t(`car.categories.${categoryKey}`) : t('car.categories.other');
+        };
+
+        // Get transmission type based on language
+        const getTransmissionType = (typeId) => {
+            if (!typeId) return "";
+
+            const transmissionKey = {
+                "1": "manual",
+                "2": "automatic",
+                "3": "tiptronic",
+                "4": "variator"
+            }[typeId];
+
+            return transmissionKey ? t(`car.transmission.${transmissionKey}`) : "";
+        };
+
+        // Get fuel type based on language
+        const getFuelType = (typeId) => {
+            if (!typeId) return "";
+
+            const fuelKey = {
+                "2": "petrol",
+                "3": "diesel",
+                "4": "electric",
+                "5": "hybrid",
+                "6": "naturalGas",
+                "7": "lpg",
+                "8": "hydrogen",
+                "9": "pluginHybrid"
+            }[typeId];
+
+            return fuelKey ? t(`car.fuel.${fuelKey}`) : "";
+        };
+
         return (
             <div className="car-card">
                 <div className="car-image-container">
@@ -280,29 +309,29 @@ const Main = ({
                 </div>
                 <div className="car-info">
                     <h2 className="car-title">
-                        {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} წ` : ''}</span>
+                        {carName} <span className="car-year">{car.prod_year ? `${car.prod_year} ${t('car.year')}` : ''}</span>
                     </h2>
-                    <p className="car-category">{categoryMapping[car.category_id] || "სხვა"}</p>
+                    <p className="car-category">{getCategoryName(car.category_id)}</p>
 
                     <div className="car-specs">
                         <div className="specs-row">
                             <span className="spec-item">
                                 <i className="spec-icon">🚘</i>
-                                {car.right_wheel ? "მარჯვენა" : "მარცხენა"} საჭე
+                                {car.right_wheel ? t('car.rightWheel') : t('car.leftWheel')}
                             </span>
                             <span className="spec-item">
                                 <i className="spec-icon">⚙️</i>
-                                {transmissionTypes[car.gear_type_id] || "გადაცემათა კოლოფი"}
+                                {getTransmissionType(car.gear_type_id)}
                             </span>
                         </div>
                         <div className="specs-row">
                             <span className="spec-item">
                                 <i className="spec-icon">🔧</i>
-                                {engineVolume} {fuelTypes[car.fuel_type_id] || ""}
+                                {engineVolume} {getFuelType(car.fuel_type_id)}
                             </span>
                             <span className="spec-item">
                                 <i className="spec-icon">📍</i>
-                                {car.car_run_km?.toLocaleString()} კმ
+                                {car.car_run_km?.toLocaleString()} {t('car.km')}
                             </span>
                         </div>
                     </div>
@@ -311,12 +340,12 @@ const Main = ({
                         {car.customs_passed ? (
                             <div className="customs-passed">
                                 <FaCheckCircle />
-                                <span>განბაჟებული</span>
+                                <span>{t('car.customs.cleared')}</span>
                             </div>
                         ) : (
                             <div className="customs-duty">
                                 <RiMoneyDollarCircleLine />
-                                <span>განბაჟება: {customsDutyAmount} $</span>
+                                <span>{t('car.customs.duty')}: {customsDutyAmount} $</span>
                             </div>
                         )}
                     </div>
@@ -348,7 +377,7 @@ const Main = ({
                         </div>
                     </div>
 
-                    {car.for_rent === "1" && <span className="rental-badge">ქირავდება</span>}
+                    {car.for_rent === "1" && <span className="rental-badge">{t('filters.forRent')}</span>}
                 </div>
             </div>
         );
@@ -357,7 +386,7 @@ const Main = ({
     if (loading) {
         return (
             <div className="loading-container">
-                <p className="loading-text">იტვირთება...</p>
+                <p className="loading-text">{t('common.loading')}</p>
             </div>
         );
     }
@@ -379,7 +408,7 @@ const Main = ({
             {showFavoritesPanel && (
                 <div className="favorites-panel">
                     <div className="favorites-panel-header">
-                        <h3>ჩემი ფავორიტები ({favorites.length})</h3>
+                        <h3>{t('favorites.title')} ({favorites.length})</h3>
                         <button className="close-panel-btn" onClick={toggleFavoritesPanel}>
                             <FaTimes />
                         </button>
@@ -422,8 +451,8 @@ const Main = ({
                             ))
                         ) : (
                             <div className="empty-favorites">
-                                <p>ფავორიტები ცარიელია</p>
-                                <p>დააჭირეთ გულის ღილაკს მანქანის დასამატებლად</p>
+                                <p>{t('favorites.empty')}</p>
+                                <p>{t('favorites.addHint')}</p>
                             </div>
                         )}
                     </div>
@@ -434,7 +463,7 @@ const Main = ({
             {activeTab === 'favorites' && (
                 <div className="header-container">
                     <div className="results-count">
-                        ფავორიტები: {sortedCars.length} მანქანა
+                        {t('favorites.title')}: {sortedCars.length} {t('car.listings')}
                     </div>
                 </div>
             )}
@@ -444,7 +473,7 @@ const Main = ({
                     {activeTab === 'search' && (
                         <div className="header-container">
                             <div className="results-count">
-                                ნაპოვნია: {sortedCars.length} განცხადება
+                                {t('search.resultsFound')}: {sortedCars.length} {t('search.announcements')}
                             </div>
                             <div className="filters-container">
                                 <PeriodFilter onPeriodChange={handlePeriodChange} />
@@ -466,10 +495,10 @@ const Main = ({
                 <div className="no-results-container">
                     <p className="no-results">
                         {activeTab === 'favorites'
-                            ? "❤️ ფავორიტები ცარიელია"
+                            ? `❤️ ${t('favorites.empty')}`
                             : isSearched
-                                ? "🔍 არჩეული პარამეტრებით მანქანა ვერ მოიძებნა"
-                                : "🚗 მანქანები არ მოიძებნა"}
+                                ? `🔍 ${t('common.noResultsForFilters')}`
+                                : `🚗 ${t('common.noResults')}`}
                     </p>
                 </div>
             )}

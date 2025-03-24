@@ -1,4 +1,3 @@
-// src/components/Filters.jsx
 import React, { useMemo, useCallback, useEffect, useState, useContext } from "react";
 import PropTypes from 'prop-types';
 import { LanguageContext } from '../contexts/LanguageContext';

@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -7,6 +8,7 @@ import Guest from './components/Guest';
 import Login from './components/Login';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { fetchManufacturers, fetchCategories, fetchModelsForManufacturers, fetchCarListings } from './components/api';
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
@@ -45,9 +47,7 @@ function App() {
         const loadInitialData = async () => {
             try {
                 const [manufacturersData, categoriesData] = await Promise.all([
-                    // eslint-disable-next-line no-undef
                     fetchManufacturers(),
-                    // eslint-disable-next-line no-undef
                     fetchCategories()
                 ]);
                 setManufacturers(manufacturersData);
@@ -63,7 +63,6 @@ function App() {
         const loadModelsForSelectedManufacturers = async () => {
             if (selectedManufacturer && selectedManufacturer.length > 0) {
                 try {
-                    // eslint-disable-next-line no-undef
                     const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
                     console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
 
@@ -100,7 +99,6 @@ function App() {
         setActiveTab("search");
         window.location.hash = 'search';
         try {
-            // eslint-disable-next-line no-undef
             const carListings = await fetchCarListings();
 
             const results = carListings.filter(car => {
@@ -156,53 +154,53 @@ function App() {
         return favorites.some(fav => String(fav.car_id) === String(carId));
     };
 
-        return (
-            <LanguageProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/" element={
-                            <div className="app-container">
-                                <Guest />
-                                <LanguageSwitcher />
-                                <SideBar
-                                    setVehicleType={setVehicleType}
-                                    saleType={saleType}
-                                    setSaleType={setSaleType}
-                                    selectedManufacturer={selectedManufacturer}
-                                    setSelectedManufacturer={setSelectedManufacturer}
-                                    category={category}
-                                    setCategory={setCategory}
-                                    manufacturers={filteredManufacturers}
-                                    categories={filteredCategories}
-                                    models={models}
-                                    setModels={setModels}
-                                    selectedModel={selectedModel}
-                                    setSelectedModel={setSelectedModel}
-                                    minPrice={minPrice}
-                                    setMinPrice={setMinPrice}
-                                    maxPrice={maxPrice}
-                                    setMaxPrice={setMaxPrice}
-                                    currency={currency}
-                                    setCurrency={setCurrency}
-                                    onSearch={handleSearch}
-                                />
-                                <Main
-                                    selectedManufacturer={selectedManufacturer}
-                                    selectedModel={selectedModel}
-                                    category={category}
-                                    searchResults={activeTab === "search" ? searchResults : favorites}
-                                    isSearched={isSearched}
-                                    toggleFavorite={toggleFavorite}
-                                    isFavorite={isFavorite}
-                                    activeTab={activeTab}
-                                />
-                            </div>
-                        } />
-                    </Routes>
-                </BrowserRouter>
-            </LanguageProvider>
-        );
-    }
+    return (
+        <LanguageProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={
+                        <div className="app-container">
+                            <Guest />
+                            <LanguageSwitcher />
+                            <SideBar
+                                setVehicleType={setVehicleType}
+                                saleType={saleType}
+                                setSaleType={setSaleType}
+                                selectedManufacturer={selectedManufacturer}
+                                setSelectedManufacturer={setSelectedManufacturer}
+                                category={category}
+                                setCategory={setCategory}
+                                manufacturers={filteredManufacturers}
+                                categories={filteredCategories}
+                                models={models}
+                                setModels={setModels}
+                                selectedModel={selectedModel}
+                                setSelectedModel={setSelectedModel}
+                                minPrice={minPrice}
+                                setMinPrice={setMinPrice}
+                                maxPrice={maxPrice}
+                                setMaxPrice={setMaxPrice}
+                                currency={currency}
+                                setCurrency={setCurrency}
+                                onSearch={handleSearch}
+                            />
+                            <Main
+                                selectedManufacturer={selectedManufacturer}
+                                selectedModel={selectedModel}
+                                category={category}
+                                searchResults={activeTab === "search" ? searchResults : favorites}
+                                isSearched={isSearched}
+                                toggleFavorite={toggleFavorite}
+                                isFavorite={isFavorite}
+                                activeTab={activeTab}
+                            />
+                        </div>
+                    } />
+                </Routes>
+            </BrowserRouter>
+        </LanguageProvider>
+    );
+}
 
-    export default App;
+export default App;

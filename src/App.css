@@ -2107,21 +2107,11 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-/* Add this to your App.css file */
-
 /* Language Switcher Styles */
 .language-switcher-container {
     position: fixed;
-    top: 80px;
-    right: 10px;
+    top: 25px;
+    right: 160px; /* Adjusted to position to the left of Guest button */
     z-index: 1000;
 }
 
@@ -2129,7 +2119,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background-color: #fd4100;
+    background-color: #6c757d; /* Blueish-gray color */
     color: white;
     border: none;
     border-radius: 8px;
@@ -2142,7 +2132,7 @@ body {
 }
 
 .language-switcher-button:hover {
-    background-color: #e53900;
+    background-color: #5a6268; /* Darker shade on hover */
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
@@ -2178,13 +2168,21 @@ body {
 
 .language-option:hover {
     background: #f5f5f5;
-    color: #fd4100;
+    color: #6c757d;
 }
 
 .language-option.active {
     background: #f0f0f0;
-    color: #fd4100;
+    color: #6c757d;
     font-weight: 600;
+}
+
+/* Guest Button Styles */
+.guest-button-container {
+    position: fixed;
+    top: 20px;
+    right: 10px !important; /* Reduced from 20px to 10px */
+    z-index: 1000;
 }
 
 /* Responsive adjustments */
@@ -2192,4 +2190,22 @@ body {
     .language-switcher-container {
         top: 70px;
     }
+}
+
+/* Header and Filters */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    width: 100%;
+    flex-direction: row; /* Stack items vertically */
+    justify-content: flex-start;
+}
+
+.filters-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
