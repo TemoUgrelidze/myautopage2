@@ -1662,9 +1662,10 @@ body {
 
 
 /* ფავორიტების ღილაკის სტილები მარჯვენა ზედა კუთხეში */
+/* ფავორიტების ღილაკის სტილები მარჯვენა ზედა კუთხეში */
 .favorites-button-container {
     position: fixed;
-    top: 20px;
+    top: 150px; /* Increased from 70px to 90px */
     right: 20px;
     z-index: 1000;
 }
@@ -1715,6 +1716,7 @@ body {
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 
 /* ფავორიტების პანელის სტილები */
 .favorites-panel {
@@ -1869,9 +1871,11 @@ body {
 .guest-button-container {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 10px !important; /* Reduced from 20px to 10px */
     z-index: 1000;
 }
+
+
 
 .guest-button {
     display: flex;
@@ -1880,11 +1884,19 @@ body {
     background-color: #fd4100;
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 10px 15px;
+    border-radius: 8px; /* Increased for a softer look */
+    padding: 12px 18px; /* Slightly larger padding */
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+.guest-button:hover {
+    background-color: #e53900; /* Darker shade on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
 
 .guest-icon {
@@ -1892,5 +1904,206 @@ body {
 }
 
 
+
+
+
+
+/* Login Page Styles */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f5f7;
+    background-image: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    transition: all 0.3s ease;
+}
+
+.login-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.login-header h1 {
+    font-size: 28px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.login-header p {
+    color: #777;
+    font-size: 16px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input {
+    padding: 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s;
+    background-color: #f9f9f9;
+}
+
+.form-group input:focus {
+    border-color: #fd4100;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(253, 65, 0, 0.1);
+    background-color: #fff;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -10px;
+}
+
+.remember-me input {
+    width: 18px;
+    height: 18px;
+    accent-color: #fd4100;
+}
+
+.remember-me label {
+    font-size: 14px;
+    color: #666;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.login-submit-btn, .back-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.login-submit-btn {
+    background-color: #fd4100;
+    color: white;
+}
+
+.login-submit-btn:hover {
+    background-color: #e53900;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(253, 65, 0, 0.3);
+}
+
+.login-submit-btn:active {
+    transform: translateY(0);
+}
+
+.back-btn {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.back-btn:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.back-btn:active {
+    transform: translateY(0);
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.forgot-password a {
+    color: #fd4100;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.register-link p {
+    color: #666;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #fd4100;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 25px;
+    }
+
+    .login-header h1 {
+        font-size: 24px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .login-submit-btn, .back-btn {
+        width: 100%;
+    }
+}
 
 
