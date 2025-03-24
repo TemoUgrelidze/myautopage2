@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import SideBar from "./components/SideBar.jsx";
 import Main from "./components/Main.jsx";
+import Guest from "./components/Guest.jsx";
+import Login from "./components/Login";
 import { fetchManufacturers, fetchCategories, fetchCarListings, fetchModelsForManufacturers } from "./components/api.jsx";
 
 function App() {
@@ -21,7 +24,6 @@ function App() {
     const [favorites, setFavorites] = useState([]);
     const [activeTab, setActiveTab] = useState("search");
 
-    // ფავორიტების ჩატვირთვა
     useEffect(() => {
         const savedFavorites = localStorage.getItem('favorites');
         if (savedFavorites) {
@@ -34,12 +36,10 @@ function App() {
         }
     }, []);
 
-    // ფავორიტების შენახვა localStorage-ში როცა ისინი იცვლება
     useEffect(() => {
         localStorage.setItem('favorites', JSON.stringify(favorites));
     }, [favorites]);
 
-    // მწარმოებლებისა და კატეგორიების ჩატვირთვა
     useEffect(() => {
         const loadInitialData = async () => {
             try {
@@ -56,12 +56,10 @@ function App() {
         loadInitialData();
     }, []);
 
-    // მოდელების ჩატვირთვა როცა მწარმოებელი იცვლება
     useEffect(() => {
         const loadModelsForSelectedManufacturers = async () => {
             if (selectedManufacturer && selectedManufacturer.length > 0) {
                 try {
-                    // ჩატვირთვა მხოლოდ არჩეული მწარმოებლების მოდელების
                     const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
                     console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
 
@@ -71,7 +69,6 @@ function App() {
                     setModels([]);
                 }
             } else {
-                // თუ მწარმოებელი არ არის არჩეული, გავასუფთაოთ მოდელები
                 setModels([]);
             }
         };
@@ -79,7 +76,6 @@ function App() {
         loadModelsForSelectedManufacturers();
     }, [selectedManufacturer]);
 
-    // Filter manufacturers based on vehicle type
     const filteredManufacturers = manufacturers.filter((brand) => {
         if (vehicleType === "car") return brand.is_car === "1";
         if (vehicleType === "tractor") return brand.is_spec === "1";
@@ -97,13 +93,12 @@ function App() {
 
     const handleSearch = async () => {
         setIsSearched(true);
-        setActiveTab("search"); // ძებნის ტაბზე გადასვლა
+        setActiveTab("search");
         window.location.hash = 'search';
         try {
             const carListings = await fetchCarListings();
 
             const results = carListings.filter(car => {
-                // მწარმოებლების შემოწმება - თუ არჩეულია ერთი ან მეტი მწარმოებელი
                 const manufacturerMatch = selectedManufacturer.length === 0 ||
                     selectedManufacturer.includes(String(car.man_id));
 
@@ -130,19 +125,15 @@ function App() {
         }
     };
 
-
-    // ფავორიტებში დამატება/წაშლის ფუნქცია
     const toggleFavorite = (car) => {
         console.log(" მანქანისთვის:", car.car_id);
 
         setFavorites(prevFavorites => {
-            // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
             const isAlreadyFavorite = prevFavorites.some(fav => String(fav.car_id) === String(car.car_id));
             console.log("უკვე ფავორიტებშია?", isAlreadyFavorite);
 
             let newFavorites;
             if (isAlreadyFavorite) {
-                // თუ უკვე ფავორიტებშია, წავშალოთ
                 newFavorites = prevFavorites.filter(fav => String(fav.car_id) !== String(car.car_id));
                 console.log("წაშლილია ფავორიტებიდან");
             } else {
@@ -150,55 +141,59 @@ function App() {
                 console.log("დამატებულია ფავორიტებში");
             }
 
-            // შევინახოთ ახალი ფავორიტები localStorage-ში
             localStorage.setItem('favorites', JSON.stringify(newFavorites));
             return newFavorites;
         });
     };
 
-// შევამოწმოთ არის თუ არა მანქანა ფავორიტებში
     const isFavorite = (carId) => {
         if (!carId) return false;
         return favorites.some(fav => String(fav.car_id) === String(carId));
     };
 
-
-
     return (
-        <div className="app-container">
-            <SideBar
-                setVehicleType={setVehicleType}
-                saleType={saleType}
-                setSaleType={setSaleType}
-                selectedManufacturer={selectedManufacturer}
-                setSelectedManufacturer={setSelectedManufacturer}
-                category={category}
-                setCategory={setCategory}
-                manufacturers={filteredManufacturers}
-                categories={filteredCategories}
-                models={models}
-                setModels={setModels}
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
-                currency={currency}
-                setCurrency={setCurrency}
-                onSearch={handleSearch}
-            />
-            <Main
-                selectedManufacturer={selectedManufacturer}
-                selectedModel={selectedModel}
-                category={category}
-                searchResults={activeTab === "search" ? searchResults : favorites}
-                isSearched={isSearched}
-                toggleFavorite={toggleFavorite}
-                isFavorite={isFavorite}
-                activeTab={activeTab}
-            />
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={
+                    <div className="app-container">
+                        <Guest />
+                        <SideBar
+                            setVehicleType={setVehicleType}
+                            saleType={saleType}
+                            setSaleType={setSaleType}
+                            selectedManufacturer={selectedManufacturer}
+                            setSelectedManufacturer={setSelectedManufacturer}
+                            category={category}
+                            setCategory={setCategory}
+                            manufacturers={filteredManufacturers}
+                            categories={filteredCategories}
+                            models={models}
+                            setModels={setModels}
+                            selectedModel={selectedModel}
+                            setSelectedModel={setSelectedModel}
+                            minPrice={minPrice}
+                            setMinPrice={setMinPrice}
+                            maxPrice={maxPrice}
+                            setMaxPrice={setMaxPrice}
+                            currency={currency}
+                            setCurrency={setCurrency}
+                            onSearch={handleSearch}
+                        />
+                        <Main
+                            selectedManufacturer={selectedManufacturer}
+                            selectedModel={selectedModel}
+                            category={category}
+                            searchResults={activeTab === "search" ? searchResults : favorites}
+                            isSearched={isSearched}
+                            toggleFavorite={toggleFavorite}
+                            isFavorite={isFavorite}
+                            activeTab={activeTab}
+                        />
+                    </div>
+                } />
+            </Routes>
+        </Router>
     );
 }
 
