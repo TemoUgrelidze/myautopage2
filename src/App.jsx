@@ -132,36 +132,35 @@ function App() {
 
 
     // ფავორიტებში დამატება/წაშლის ფუნქცია
-const toggleFavorite = (car) => {
-    console.log(" მანქანისთვის:", car.car_id);
+    const toggleFavorite = (car) => {
+        console.log(" მანქანისთვის:", car.car_id);
 
-    setFavorites(prevFavorites => {
-        // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
-        const isAlreadyFavorite = prevFavorites.some(fav => String(fav.car_id) === String(car.car_id));
-        console.log("უკვე ფავორიტებშია?", isAlreadyFavorite);
+        setFavorites(prevFavorites => {
+            // შევამოწმოთ არის თუ არა მანქანა უკვე ფავორიტებში
+            const isAlreadyFavorite = prevFavorites.some(fav => String(fav.car_id) === String(car.car_id));
+            console.log("უკვე ფავორიტებშია?", isAlreadyFavorite);
 
-        let newFavorites;
-        if (isAlreadyFavorite) {
-            // თუ უკვე ფავორიტებშია, წავშალოთ
-            newFavorites = prevFavorites.filter(fav => String(fav.car_id) !== String(car.car_id));
-            console.log("წაშლილია ფავორიტებიდან");
-        } else {
-            // თუ არ არის ფავორიტებში, დავამატოთ
-            newFavorites = [...prevFavorites, car];
-            console.log("დამატებულია ფავორიტებში");
-        }
+            let newFavorites;
+            if (isAlreadyFavorite) {
+                // თუ უკვე ფავორიტებშია, წავშალოთ
+                newFavorites = prevFavorites.filter(fav => String(fav.car_id) !== String(car.car_id));
+                console.log("წაშლილია ფავორიტებიდან");
+            } else {
+                newFavorites = [...prevFavorites, car];
+                console.log("დამატებულია ფავორიტებში");
+            }
 
-        // შევინახოთ ახალი ფავორიტები localStorage-ში
-        localStorage.setItem('favorites', JSON.stringify(newFavorites));
-        return newFavorites;
-    });
-};
+            // შევინახოთ ახალი ფავორიტები localStorage-ში
+            localStorage.setItem('favorites', JSON.stringify(newFavorites));
+            return newFavorites;
+        });
+    };
 
 // შევამოწმოთ არის თუ არა მანქანა ფავორიტებში
-const isFavorite = (carId) => {
-    if (!carId) return false;
-    return favorites.some(fav => String(fav.car_id) === String(carId));
-};
+    const isFavorite = (carId) => {
+        if (!carId) return false;
+        return favorites.some(fav => String(fav.car_id) === String(carId));
+    };
 
 
 

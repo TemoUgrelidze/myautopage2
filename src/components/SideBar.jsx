@@ -5,7 +5,7 @@ import Filters from "./Filters";
 function SideBar({ setVehicleType, onSearch, ...filterProps }) {
     return (
         <div className="box-side">
-            {/* ლოგოს კონტეინერი */}
+
             <div className="logo-container">
                 <img
                     src="/images/myauto-logo.svg"  // გზა შეცვლილია
