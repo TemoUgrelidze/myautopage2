@@ -1,7 +1,7 @@
 // src/components/PeriodFilter.jsx
 import React, { useState, useContext } from 'react';
 import { FaClock } from 'react-icons/fa';
-import { LanguageContext } from '../contexts/LanguageContext';
+import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
 const PeriodFilter = ({ onPeriodChange }) => {
     const { t } = useContext(LanguageContext);

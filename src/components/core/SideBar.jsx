@@ -1,6 +1,6 @@
 
 import React from "react";
-import Filters from "./Filters";
+import Filters from "./Filters.jsx";
 
 function SideBar({ setVehicleType, onSearch, ...filterProps }) {
     return (

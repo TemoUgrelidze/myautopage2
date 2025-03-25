@@ -1,11 +1,11 @@
 // src/components/Main.jsx
 import React, { useEffect, useState, useContext } from "react";
-import { fetchCarListings, fetchManufacturers } from "./api.jsx";
-import SortDropdown from './SortDropdown';
-import PeriodFilter from './PeriodFilter';
+import { fetchCarListings, fetchManufacturers } from "../Api/api.jsx";
+import SortDropdown from '../ui/SortDropdown.jsx';
+import PeriodFilter from '../ui/PeriodFilter.jsx';
 import { FaHeart, FaEye, FaMapMarkerAlt, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
-import { LanguageContext } from '../contexts/LanguageContext';
+import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
 const Main = ({
                   searchResults,

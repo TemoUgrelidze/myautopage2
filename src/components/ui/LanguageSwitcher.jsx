@@ -1,7 +1,7 @@
 // src/components/LanguageSwitcher.jsx
 import React, { useState, useContext } from 'react';
 import { FaGlobe } from 'react-icons/fa';
-import { LanguageContext } from '../contexts/LanguageContext';
+import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
 const LanguageSwitcher = () => {
     const { language, setLanguage } = useContext(LanguageContext);

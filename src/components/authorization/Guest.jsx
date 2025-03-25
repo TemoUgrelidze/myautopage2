@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { LanguageContext } from '../contexts/LanguageContext';
+import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
 const Guest = () => {
     const navigate = useNavigate();

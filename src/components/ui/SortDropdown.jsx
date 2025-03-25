@@ -1,7 +1,7 @@
 // src/components/SortDropdown.jsx
 import React, { useState, useContext } from 'react';
 import { FaSort } from 'react-icons/fa';
-import { LanguageContext } from '../contexts/LanguageContext';
+import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
 const SortDropdown = ({ onSort }) => {
     const { t } = useContext(LanguageContext);

@@ -1,14 +1,13 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
-import SideBar from './components/SideBar';
-import Main from './components/Main';
-import Guest from './components/Guest';
-import Login from './components/Login';
-import LanguageSwitcher from './components/LanguageSwitcher';
+import SideBar from './components/core/SideBar.jsx';
+import Main from './components/core/Main.jsx';
+import Guest from './components/authorization/Guest.jsx';
+import Login from './components/authorization/Login.jsx';
+import LanguageSwitcher from './components/ui/LanguageSwitcher.jsx';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { fetchManufacturers, fetchCategories, fetchModelsForManufacturers, fetchCarListings } from './components/api';
+import { fetchManufacturers, fetchCategories, fetchModelsForManufacturers, fetchCarListings } from './components/Api/api.jsx';
 
 function App() {
     const [manufacturers, setManufacturers] = useState([]);
