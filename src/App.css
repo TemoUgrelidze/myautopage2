@@ -850,7 +850,7 @@ body {
     align-items: center;
 }
 
-/* Cars Grid */
+
 .cars-grid {
     display: flex;
     flex-direction: column; /* ჩამონათვალი ქვემოთ-ქვემოთ */
