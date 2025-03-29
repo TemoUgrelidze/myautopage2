@@ -1,4 +1,4 @@
-
+/* General Reset */
 * {
     margin: 0;
     padding: 0;
@@ -228,81 +228,10 @@ body {
     align-items: center;
 }
 
-/* Cars Grid */
-.cars-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-}
 
-/* Car Card Styles */
-.car-card {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-    width: 100%;
-}
 
-.car-card:hover {
-    transform: scale(1.02);
-}
 
-.car-image-container {
-    position: relative;
-    flex-shrink: 0;
-    width: 250px;
-    height: 160px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-right: 25px;
-}
 
-.car-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.car-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.car-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-}
-
-.car-year {
-    color: #777;
-    font-size: 16px;
-}
-
-.car-details {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
-}
-
-.car-price {
-    color: #e63946;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.car-price-usd {
-    color: #555;
-    font-size: 14px;
-    margin-left: 5px;
-}
 
 /* Dropdown Styles */
 .sort-dropdown,
@@ -924,34 +853,40 @@ body {
 /* Cars Grid */
 .cars-grid {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: column; /* ჩამონათვალი ქვემოთ-ქვემოთ */
+    gap: 8px;
     width: 100%;
+    max-width: 470px; /* კიდევ უფრო გადიდებული სიგანე */
+    margin: 0 auto; /* ცენტრში განთავსება */
+    margin-left: -20px; /* მარცხნივ გადმოტანა margin-ით */
+    /* transform: translateX(-20px);  transform-ის ნაცვლად margin */
 }
+
 
 /* Car Card Styles */
 .car-card {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 6px; /* კიდევ უფრო შევამცირებთ padding-ს */
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1); /* ოდნავ შევამცირებთ shadow-ს */
     transition: transform 0.3s ease-in-out;
     width: 100%;
 }
 
 .car-card:hover {
-    transform: scale(1.02);
+    transform: scale(1.005);
 }
 
 .car-image-container {
-    flex-shrink: 0;
-    width: 250px;
-    height: 160px;
-    border-radius: 8px;
+    position: relative;
+    width: 100%;
+    height: 80px; /* შევამცირებთ სიმაღლეს */
+    border-radius: 5px;
     overflow: hidden;
-    margin-right: 25px;
+    margin-bottom: 4px; /* შევამცირებთ მანძილს */
 }
 
 .car-image {
@@ -964,36 +899,43 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 3px; /* კიდევ უფრო შევამცირებთ gap-ს */
 }
 
 .car-title {
-    font-size: 18px;
+    font-size: 10px; /* შევამცირებთ შრიფტის ზომას */
     font-weight: bold;
     color: #333;
 }
 
 .car-year {
     color: #777;
-    font-size: 16px;
+    font-size: 9px; /* შევამცირებთ შრიფტის ზომას */
 }
 
 .car-details {
-    font-size: 14px;
+    font-size: 8px; /* შევამცირებთ შრიფტის ზომას */
     color: #666;
-    margin-top: 5px;
+    margin-top: 1px;
 }
 
 .car-price {
     color: #e63946;
-    font-size: 20px;
+    font-size: 12px; /* შევამცირებთ შრიფტის ზომას */
     font-weight: bold;
 }
 
 .car-price-usd {
     color: #555;
-    font-size: 14px;
-    margin-left: 5px;
+    font-size: 9px; /* შევამცირებთ შრიფტის ზომას */
+    margin-left: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .car-image-container {
+        height: 120px; /* მობილურებისთვისაც დაპატარავებული სიმაღლე */
+    }
 }
 
 /* Dropdown Styles */
