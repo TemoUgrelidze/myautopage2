@@ -853,13 +853,12 @@ body {
 
 .cars-grid {
     display: flex;
-    flex-direction: column; /* ჩამონათვალი ქვემოთ-ქვემოთ */
+    flex-direction: column;
     gap: 8px;
     width: 100%;
-    max-width: 470px; /* კიდევ უფრო გადიდებული სიგანე */
-    margin: 0 auto; /* ცენტრში განთავსება */
-    margin-left: -20px; /* მარცხნივ გადმოტანა margin-ით */
-    /* transform: translateX(-20px);  transform-ის ნაცვლად margin */
+    max-width: 550px;
+    margin: 0 auto;
+    margin-left: -20px;
 }
 
 
@@ -886,7 +885,7 @@ body {
     height: 80px; /* შევამცირებთ სიმაღლეს */
     border-radius: 5px;
     overflow: hidden;
-    margin-bottom: 4px; /* შევამცირებთ მანძილს */
+    margin-bottom: 10px; /* შევამცირებთ მანძილს */
 }
 
 .car-image {

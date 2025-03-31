@@ -1,4 +1,3 @@
-// src/components/SortDropdown.jsx
 import React, { useState, useContext } from 'react';
 import { FaSort } from 'react-icons/fa';
 import { LanguageContext } from '../../contexts/LanguageContext.jsx';
@@ -9,12 +8,12 @@ const SortDropdown = ({ onSort }) => {
     const [selectedOption, setSelectedOption] = useState(t('sort.default'));
 
     const sortOptions = [
-        { label: t('sort.dateDesc'), field: 'date', order: 'desc' },
-        { label: t('sort.dateAsc'), field: 'date', order: 'asc' },
-        { label: t('sort.priceDesc'), field: 'price', order: 'desc' },
-        { label: t('sort.priceAsc'), field: 'price', order: 'asc' },
-        { label: t('sort.mileageDesc'), field: 'mileage', order: 'desc' },
-        { label: t('sort.mileageAsc'), field: 'mileage', order: 'asc' }
+        { label: t('sort.dateAsc'), field: 'date', order: 'desc' },
+        { label: t('sort.dateDesc'), field: 'date', order: 'asc' },
+        { label: t('sort.priceAsc'), field: 'price', order: 'desc' },
+        { label: t('sort.priceDesc'), field: 'price', order: 'asc' },
+        { label: t('sort.mileageAsc'), field: 'mileage', order: 'desc' },
+        { label: t('sort.mileageDesc'), field: 'mileage', order: 'asc' }
     ];
 
     const toggleDropdown = () => {

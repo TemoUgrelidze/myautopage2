@@ -1,4 +1,3 @@
-// src/components/Guest.jsx
 import React, { useContext } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
