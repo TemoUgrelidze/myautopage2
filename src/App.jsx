@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
+import './styles/base.css';
+import './styles/sidebar.css';
+import './styles/car-card.css';
+import './styles/filters.css';
+import './styles/favorites.css';
+import './styles/auth.css';
 import SideBar from './components/core/SideBar.jsx';
 import Main from './components/core/Main.jsx';
 import Guest from './components/authorization/Guest.jsx';
@@ -93,7 +99,7 @@ function App() {
         return false;
     });
 
-    const handleSearch = async () => {
+    const handleSearch = async (customsStatus = "all") => {
         setIsSearched(true);
         setActiveTab("search");
         window.location.hash = 'search';
@@ -116,8 +122,13 @@ function App() {
                 const saleTypeMatch = !saleType ||
                     String(car.for_rent) === (saleType === "2" ? "1" : "0");
 
+                // Add customs status filter
+                const customsMatch = customsStatus === "all" ||
+                    (customsStatus === "cleared" && car.customs_passed === "1") ||
+                    (customsStatus === "notCleared" && car.customs_passed === "0");
+
                 return manufacturerMatch && modelMatch &&
-                    categoryMatch && priceMatch && saleTypeMatch;
+                    categoryMatch && priceMatch && saleTypeMatch && customsMatch;
             });
 
             setSearchResults(results);

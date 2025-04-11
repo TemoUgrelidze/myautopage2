@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useState, useContext } from "react";
+import React, { useMemo, useCallback, useEffect, useState, useContext, useRef } from "react";
 import PropTypes from 'prop-types';
 import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
@@ -160,6 +160,155 @@ const Select = React.memo(({
     );
 });
 
+// Modified PriceFilter component for Filters.jsx
+// Modified PriceFilter component for Filters.jsx
+const PriceFilter = React.memo(({
+                                    minPrice,
+                                    setMinPrice,
+                                    maxPrice,
+                                    setMaxPrice,
+                                    currency,
+                                    setCurrency
+                                }) => {
+    const { t } = useContext(LanguageContext);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Predefined price ranges
+    const priceRanges = [
+        { min: '5000', max: '10000' },
+        { min: '10000', max: '15000' },
+        { min: '15000', max: '20000' },
+        { min: '20000', max: '30000' },
+        { min: '30000', max: '50000' },
+        { min: '50000', max: '100000' }
+    ];
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
+    };
+
+    const handleCurrencyToggle = (newCurrency) => {
+        if (newCurrency === currency) return;
+
+        const exchangeRate = 2.65;
+        let newMinPrice = minPrice;
+        let newMaxPrice = maxPrice;
+
+        if (newCurrency === 'USD') {
+            // GEL to USD
+            newMinPrice = minPrice ? (Number(minPrice) / exchangeRate).toFixed(0) : '';
+            newMaxPrice = maxPrice ? (Number(maxPrice) / exchangeRate).toFixed(0) : '';
+        } else {
+            // USD to GEL
+            newMinPrice = minPrice ? (Number(minPrice) * exchangeRate).toFixed(0) : '';
+            newMaxPrice = maxPrice ? (Number(maxPrice) * exchangeRate).toFixed(0) : '';
+        }
+
+        setMinPrice(newMinPrice);
+        setMaxPrice(newMaxPrice);
+        setCurrency(newCurrency);
+    };
+
+    const selectPriceRange = (min, max) => {
+        setMinPrice(min);
+        setMaxPrice(max);
+        setIsOpen(false);
+    };
+
+    const currencySymbol = currency === 'GEL' ? '₾' : '$';
+
+    return (
+        <div className="select-container">
+            <label>{t('filters.price')}</label>
+            <div className="custom-select" ref={dropdownRef}>
+                <div
+                    className="select-header"
+                    onClick={toggleDropdown}
+                >
+                    <span>
+                        {minPrice || maxPrice ?
+                            `${minPrice || '0'} ${currencySymbol} - ${maxPrice || '∞'} ${currencySymbol}` :
+                            "ფასი"}
+                    </span>
+                    <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                </div>
+
+                {isOpen && (
+                    <div className="select-dropdown price-select-dropdown">
+                        <div className="price-range-header">
+                            <div className="currency-toggle">
+                                <button
+                                    className={`currency-btn ${currency === 'GEL' ? 'active' : ''}`}
+                                    onClick={() => handleCurrencyToggle('GEL')}
+                                >
+                                    ₾
+                                </button>
+                                <button
+                                    className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
+                                    onClick={() => handleCurrencyToggle('USD')}
+                                >
+                                    $
+                                </button>
+                            </div>
+                        </div>
+                        <div className="price-custom-range">
+                            <input
+                                type="number"
+                                className="price-min-input"
+                                placeholder={`${t('filters.from')} ${currencySymbol}`}
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                                min="0"
+                            />
+                            <span className="price-separator">-</span>
+                            <input
+                                type="number"
+                                className="price-max-input"
+                                placeholder={`${t('filters.to')} ${currencySymbol}`}
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                                min="0"
+                            />
+                        </div>
+                        <div className="options-container">
+                            {priceRanges.map((range, index) => (
+                                <div
+                                    key={index}
+                                    className="option-item price-option"
+                                    onClick={() => selectPriceRange(range.min, range.max)}
+                                >
+                                    <span>{range.min} {currencySymbol}</span>
+                                    <span>-</span>
+                                    <span>{range.max} {currencySymbol}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
+
+
+
+
+// არსებული PriceRangeInput კომპონენტს ვტოვებთ სამომავლო გამოყენებისთვის
 const PriceRangeInput = React.memo(({
                                         value,
                                         onChange,
@@ -178,24 +327,24 @@ const PriceRangeInput = React.memo(({
 ));
 
 const Filters = ({
-                     saleType,
-                     setSaleType,
-                     selectedManufacturer,
-                     setSelectedManufacturer,
-                     manufacturers,
-                     category,
-                     setCategory,
-                     categories,
-                     models,
-                     selectedModel,
-                     setSelectedModel,
-                     minPrice,
-                     setMinPrice,
-                     maxPrice,
-                     setMaxPrice,
-                     currency,
-                     setCurrency
-                 }) => {
+    saleType,
+    setSaleType,
+    selectedManufacturer,
+    setSelectedManufacturer,
+    manufacturers,
+    category,
+    setCategory,
+    categories,
+    models,
+    selectedModel,
+    setSelectedModel,
+    minPrice,
+    setMinPrice,
+    maxPrice,
+    setMaxPrice,
+    currency,
+    setCurrency
+}) => {
     const { t } = useContext(LanguageContext);
     const [filteredModels, setFilteredModels] = useState([]);
 
@@ -288,8 +437,6 @@ const Filters = ({
         setSelectedModel("");
     }, [setSelectedManufacturer, setSelectedModel]);
 
-
-
     const handleCategoryChange = useCallback((e) => {
         const newCategory = e.target.value;
         setCategory(newCategory);
@@ -300,45 +447,20 @@ const Filters = ({
         setSelectedModel(e.target.value);
     }, [setSelectedModel]);
 
-    const handleMinPriceChange = useCallback((e) => {
-        const value = e.target.value;
-        if (value === '' || parseInt(value) >= 0) {
-            setMinPrice(value);
-        }
-    }, [setMinPrice]);
-
-    const handleMaxPriceChange = useCallback((e) => {
-        const value = e.target.value;
-        if (value === '' || parseInt(value) >= 0) {
-            setMaxPrice(value);
-        }
-    }, [setMaxPrice]);
-
-    const handleCurrencyChange = useCallback(() => {
-        const newCurrency = currency === 'GEL' ? 'USD' : 'GEL';
-        const exchangeRate = 2.65;
-
-        let newMinPrice = minPrice;
-        let newMaxPrice = maxPrice;
-
-        if (newCurrency === 'USD') {
-            newMinPrice = (Number(minPrice) / exchangeRate).toFixed(0);
-            newMaxPrice = (Number(maxPrice) / exchangeRate).toFixed(0);
-        } else {
-            newMinPrice = (Number(minPrice) * exchangeRate).toFixed(0);
-            newMaxPrice = (Number(maxPrice) * exchangeRate).toFixed(0);
-        }
-
-        setMinPrice(newMinPrice);
-        setMaxPrice(newMaxPrice);
-        setCurrency(newCurrency);
-    }, [currency, minPrice, maxPrice, setCurrency, setMinPrice, setMaxPrice]);
-
     return (
         <div className="properties">
+            {/* All selects in a flat structure - CSS will position them */}
+            <PriceFilter
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                currency={currency}
+                setCurrency={setCurrency}
+            />
+
             <Select
                 label={t('filters.dealType')}
-                className="sale-type"
                 value={saleType}
                 onChange={handleSaleTypeChange}
                 options={saleTypeOptions}
@@ -347,7 +469,6 @@ const Filters = ({
 
             <Select
                 label={t('filters.manufacturer')}
-                className="model"
                 value={selectedManufacturer}
                 onChange={handleManufacturerChange}
                 options={manufacturerOptions}
@@ -357,7 +478,6 @@ const Filters = ({
 
             <Select
                 label={t('filters.category')}
-                className="category"
                 value={category}
                 onChange={handleCategoryChange}
                 options={categoryOptions}
@@ -366,46 +486,19 @@ const Filters = ({
 
             <Select
                 label={t('filters.model')}
-                className="models"
                 value={selectedModel}
                 onChange={handleModelChange}
                 options={filteredModels}
                 disabled={false}
                 defaultOption={t('filters.allModels')}
             />
-
-            <div className="price-range">
-                <div className="price-header">
-                    <label>{t('filters.price')}</label>
-                    <button
-                        className="currency-toggle-btn"
-                        onClick={handleCurrencyChange}
-                    >
-                        {currency === 'GEL' ? '₾' : '$'}
-                    </button>
-                </div>
-                <div className="price-inputs">
-                    <PriceRangeInput
-                        className="price-input"
-                        value={minPrice}
-                        onChange={handleMinPriceChange}
-                        placeholder={t('filters.from')}
-                        currency={currency}
-                    />
-                    <span className="price-separator">-</span>
-                    <PriceRangeInput
-                        className="price-input"
-                        value={maxPrice}
-                        onChange={handleMaxPriceChange}
-                        placeholder={t('filters.to')}
-                        currency={currency}
-                    />
-                </div>
-            </div>
         </div>
     );
 };
 
+
+
+// PropTypes დეფინიციები (უცვლელი)
 Filters.propTypes = {
     saleType: PropTypes.string.isRequired,
     setSaleType: PropTypes.func.isRequired,
@@ -443,6 +536,16 @@ Filters.propTypes = {
     setCurrency: PropTypes.func.isRequired,
 };
 
+// დავამატოთ ახალი PriceFilter კომპონენტისთვის PropTypes
+PriceFilter.propTypes = {
+    minPrice: PropTypes.string,
+    setMinPrice: PropTypes.func.isRequired,
+    maxPrice: PropTypes.string,
+    setMaxPrice: PropTypes.func.isRequired,
+    currency: PropTypes.oneOf(['GEL', 'USD']).isRequired,
+    setCurrency: PropTypes.func.isRequired,
+};
+
 Select.propTypes = {
     label: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
@@ -456,7 +559,6 @@ Select.propTypes = {
             name: PropTypes.string.isRequired,
         })
     ).isRequired,
-    className: PropTypes.string.isRequired,
     disabled: PropTypes.bool,
     defaultOption: PropTypes.string,
     isMultiSelect: PropTypes.bool

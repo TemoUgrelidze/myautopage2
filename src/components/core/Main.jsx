@@ -1,4 +1,3 @@
-// src/components/Main.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { fetchCarListings, fetchManufacturers } from "../Api/api.jsx";
 import SortDropdown from '../ui/SortDropdown.jsx';
@@ -462,9 +461,6 @@ const Main = ({
 
             {activeTab === 'favorites' && (
                 <div className="header-container">
-                    <div className="results-count">
-                        {t('favorites.title')}: {sortedCars.length} {t('car.listings')}
-                    </div>
                 </div>
             )}
 
@@ -472,9 +468,6 @@ const Main = ({
                 <>
                     {activeTab === 'search' && (
                         <div className="header-container">
-                            <div className="results-count">
-                                {t('search.resultsFound')}: {sortedCars.length} {t('search.announcements')}
-                            </div>
                             <div className="filters-container">
                                 <PeriodFilter onPeriodChange={handlePeriodChange} />
                                 <SortDropdown onSort={handleSort} />
@@ -498,7 +491,8 @@ const Main = ({
                             ? `❤️ ${t('favorites.empty')}`
                             : isSearched
                                 ? `🔍 ${t('common.noResultsForFilters')}`
-                                : `🚗 ${t('common.noResults')}`}
+                                : `🚗 ${t('common.noResults')}`
+                        }
                     </p>
                 </div>
             )}
