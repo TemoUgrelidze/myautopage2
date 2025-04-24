@@ -500,3 +500,55 @@
 
 
 
+
+
+
+
+
+/* Additional CSS to adjust position */
+.deal-type-toggle {
+    display: flex;
+    justify-content: flex-end; /* Move to the right */
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+    margin-right: 20px; /* Add right margin to move further right */
+}
+
+.deal-type-btn-container {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    width: auto;
+    max-width: 250px;
+}
+
+.deal-type-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+    position: relative;
+}
+
+.deal-type-btn:first-child {
+    border-right: 1px solid #ddd;
+}
+
+.deal-type-btn.active {
+    background: #ff5400;
+    color: white;
+    font-weight: 500;
+}
+
+.deal-type-btn:hover:not(.active) {
+    background: #eee;
+}

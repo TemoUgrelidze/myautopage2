@@ -27,6 +27,10 @@ function App() {
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
     const [currency, setCurrency] = useState("GEL");
+    // Add state for new filters
+    const [minYear, setMinYear] = useState("");
+    const [maxYear, setMaxYear] = useState("");
+    const [location, setLocation] = useState(""); // Assuming location ID is a string
     const [searchResults, setSearchResults] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
     const [favorites, setFavorites] = useState([]);
@@ -51,6 +55,7 @@ function App() {
     useEffect(() => {
         const loadInitialData = async () => {
             try {
+                // Consider fetching location data here if it's dynamic
                 const [manufacturersData, categoriesData] = await Promise.all([
                     fetchManufacturers(),
                     fetchCategories()
@@ -70,7 +75,6 @@ function App() {
                 try {
                     const manufacturerModels = await fetchModelsForManufacturers(selectedManufacturer);
                     console.log("ჩატვირთულია მოდელები არჩეული მწარმოებლებისთვის:", manufacturerModels.length);
-
                     setModels(manufacturerModels);
                 } catch (error) {
                     console.error("მოდელების ჩატვირთვის შეცდომა:", error);
@@ -80,7 +84,6 @@ function App() {
                 setModels([]);
             }
         };
-
         loadModelsForSelectedManufacturers();
     }, [selectedManufacturer]);
 
@@ -99,36 +102,53 @@ function App() {
         return false;
     });
 
+    // Updated handleSearch to include all filters
     const handleSearch = async (customsStatus = "all") => {
         setIsSearched(true);
         setActiveTab("search");
-        window.location.hash = 'search';
+        window.location.hash = 'search'; // Keep track of search state in URL
         try {
+            // Fetch all listings - ideally, API should handle filtering
             const carListings = await fetchCarListings();
 
             const results = carListings.filter(car => {
+                // Manufacturer Match
                 const manufacturerMatch = selectedManufacturer.length === 0 ||
                     selectedManufacturer.includes(String(car.man_id));
 
+                // Model Match
                 const modelMatch = !selectedModel ||
                     String(car.model_id) === String(selectedModel);
 
+                // Category Match
                 const categoryMatch = !category ||
                     String(car.category_id) === String(category);
 
-                const priceMatch = (!minPrice || car.price >= Number(minPrice)) &&
-                    (!maxPrice || car.price <= Number(maxPrice));
+                // Price Match (assuming car object has price_gel and price_usd)
+                // Adjust this logic based on your actual car data structure
+                const carPrice = currency === 'GEL' ? (car.price_gel || (car.price_usd * 2.65)) : (car.price_usd || (car.price_gel / 2.65));
+                const priceMatch = (!minPrice || carPrice >= Number(minPrice)) &&
+                                   (!maxPrice || carPrice <= Number(maxPrice));
 
+                // Sale Type Match
                 const saleTypeMatch = !saleType ||
                     String(car.for_rent) === (saleType === "2" ? "1" : "0");
 
-                // Add customs status filter
+                // Year Match
+                const yearMatch = (!minYear || car.prod_year >= Number(minYear)) &&
+                                  (!maxYear || car.prod_year <= Number(maxYear));
+
+                // Location Match (assuming location state holds the location_id)
+                const locationMatch = !location || String(car.location_id) === String(location);
+
+                // Customs Status Match
                 const customsMatch = customsStatus === "all" ||
                     (customsStatus === "cleared" && car.customs_passed === "1") ||
                     (customsStatus === "notCleared" && car.customs_passed === "0");
 
-                return manufacturerMatch && modelMatch &&
-                    categoryMatch && priceMatch && saleTypeMatch && customsMatch;
+                // Return true only if all conditions match
+                return manufacturerMatch && modelMatch && categoryMatch && priceMatch &&
+                       saleTypeMatch && yearMatch && locationMatch && customsMatch;
             });
 
             setSearchResults(results);
@@ -138,13 +158,12 @@ function App() {
         }
     };
 
+
     const toggleFavorite = (car) => {
         console.log(" მანქანისთვის:", car.car_id);
-
         setFavorites(prevFavorites => {
             const isAlreadyFavorite = prevFavorites.some(fav => String(fav.car_id) === String(car.car_id));
             console.log("უკვე ფავორიტებშია?", isAlreadyFavorite);
-
             let newFavorites;
             if (isAlreadyFavorite) {
                 newFavorites = prevFavorites.filter(fav => String(fav.car_id) !== String(car.car_id));
@@ -153,7 +172,6 @@ function App() {
                 newFavorites = [...prevFavorites, car];
                 console.log("დამატებულია ფავორიტებში");
             }
-
             localStorage.setItem('favorites', JSON.stringify(newFavorites));
             return newFavorites;
         });
@@ -175,6 +193,7 @@ function App() {
                             <LanguageSwitcher />
                             <SideBar
                                 setVehicleType={setVehicleType}
+                                vehicleType={vehicleType} // Pass vehicleType if needed in SideBar
                                 saleType={saleType}
                                 setSaleType={setSaleType}
                                 selectedManufacturer={selectedManufacturer}
@@ -184,7 +203,7 @@ function App() {
                                 manufacturers={filteredManufacturers}
                                 categories={filteredCategories}
                                 models={models}
-                                setModels={setModels}
+                                setModels={setModels} // Pass setModels if needed
                                 selectedModel={selectedModel}
                                 setSelectedModel={setSelectedModel}
                                 minPrice={minPrice}
@@ -193,17 +212,25 @@ function App() {
                                 setMaxPrice={setMaxPrice}
                                 currency={currency}
                                 setCurrency={setCurrency}
+                                // Pass new filter props
+                                minYear={minYear}
+                                setMinYear={setMinYear}
+                                maxYear={maxYear}
+                                setMaxYear={setMaxYear}
+                                location={location}
+                                setLocation={setLocation}
+                                // Pass the updated search handler
                                 onSearch={handleSearch}
                             />
                             <Main
-                                selectedManufacturer={selectedManufacturer}
-                                selectedModel={selectedModel}
-                                category={category}
+                                // Pass necessary props to Main
                                 searchResults={activeTab === "search" ? searchResults : favorites}
                                 isSearched={isSearched}
                                 toggleFavorite={toggleFavorite}
                                 isFavorite={isFavorite}
                                 activeTab={activeTab}
+                                // Pass currency to Main if needed for display
+                                currency={currency}
                             />
                         </div>
                     } />

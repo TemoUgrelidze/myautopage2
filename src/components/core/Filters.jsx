@@ -2,15 +2,16 @@ import React, { useMemo, useCallback, useEffect, useState, useContext, useRef } 
 import PropTypes from 'prop-types';
 import { LanguageContext } from '../../contexts/LanguageContext.jsx';
 
+// --- Select Component (Keep as is) ---
 const Select = React.memo(({
-                               label,
-                               value,
-                               onChange,
-                               options,
-                               disabled = false,
-                               defaultOption = "ყველა",
-                               isMultiSelect = false
-                           }) => {
+    label,
+    value,
+    onChange,
+    options,
+    disabled = false,
+    defaultOption = "ყველა",
+    isMultiSelect = false
+}) => {
     const { t } = useContext(LanguageContext);
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,33 +19,30 @@ const Select = React.memo(({
         isMultiSelect ? (Array.isArray(value) ? value : []) : value
     );
 
-    // Update selectedItems when value changes from outside
     useEffect(() => {
         if (isMultiSelect) {
             setSelectedItems(Array.isArray(value) ? value : []);
+        } else {
+             setSelectedItems(value);
         }
     }, [value, isMultiSelect]);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (isOpen && !event.target.closest('.custom-select')) {
                 setIsOpen(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen]);
 
-    const filteredOptions = options && options.length > 0
+    const filteredOptions = useMemo(() => (options && options.length > 0
         ? options.filter(option =>
             option.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        : [];
+        : []), [options, searchTerm]);
 
-    const handleCheckboxChange = (optionId) => {
+    const handleCheckboxChange = useCallback((optionId) => {
         let newSelectedItems;
         if (Array.isArray(selectedItems)) {
             newSelectedItems = selectedItems.includes(optionId)
@@ -53,7 +51,14 @@ const Select = React.memo(({
             setSelectedItems(newSelectedItems);
             onChange({ target: { value: newSelectedItems } });
         }
-    };
+    }, [selectedItems, onChange]);
+
+     const handleRadioChange = useCallback((optionId) => {
+        setSelectedItems(optionId);
+        onChange({ target: { value: optionId } });
+        setIsOpen(false);
+    }, [onChange]);
+
 
     if (isMultiSelect) {
         return (
@@ -69,9 +74,10 @@ const Select = React.memo(({
                                 ? `${t('common.selected')} ${selectedItems.length}`
                                 : defaultOption}
                         </span>
-                        <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                        <svg className={`arrow ${isOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6">
+                            <path fill="currentColor" d="M0 0l5 5 5-5z"/>
+                        </svg>
                     </div>
-
                     {isOpen && !disabled && (
                         <div className="select-dropdown">
                             <input
@@ -87,8 +93,7 @@ const Select = React.memo(({
                                     <label key={option.id} className="option-item">
                                         <input
                                             type="checkbox"
-                                            checked={Array.isArray(selectedItems) &&
-                                                selectedItems.includes(option.id)}
+                                            checked={Array.isArray(selectedItems) && selectedItems.includes(option.id)}
                                             onChange={() => handleCheckboxChange(option.id)}
                                         />
                                         <span>{option.name}</span>
@@ -105,53 +110,51 @@ const Select = React.memo(({
         );
     }
 
+    // Single Select Logic
     return (
         <div className="select-container">
             <label>{label}</label>
             <div className="custom-select">
-                <div
+                 <div
                     className={`select-header ${disabled ? 'disabled' : ''}`}
                     onClick={() => !disabled && setIsOpen(!isOpen)}
                 >
                     <span>
-                        {value ? options.find(opt => opt.id === value)?.name || defaultOption : defaultOption}
+                        {options.find(opt => String(opt.id) === String(selectedItems))?.name || defaultOption}
                     </span>
-                    <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                     <svg className={`arrow ${isOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6">
+                         <path fill="currentColor" d="M0 0l5 5 5-5z"/>
+                     </svg>
                 </div>
-
                 {isOpen && !disabled && (
                     <div className="select-dropdown">
                         <div className="options-container">
-                            {/* Add "All" option at the top */}
                             <label className="option-item">
                                 <input
                                     type="radio"
-                                    checked={!value}
-                                    onChange={() => {
-                                        onChange({ target: { value: "" } });
-                                        setIsOpen(false);
-                                    }}
+                                    name={`select-${label}`}
+                                    checked={!selectedItems}
+                                    onChange={() => handleRadioChange("")}
                                 />
                                 <span>{defaultOption}</span>
                             </label>
-
-                            {options.map((option) => (
+                            {filteredOptions.map((option) => (
                                 <label key={option.id} className="option-item">
                                     <input
                                         type="radio"
-                                        checked={value === option.id}
-                                        onChange={() => {
-                                            onChange({ target: { value: option.id } });
-                                            setIsOpen(false);
-                                        }}
+                                        name={`select-${label}`}
+                                        checked={String(selectedItems) === String(option.id)}
+                                        onChange={() => handleRadioChange(option.id)}
                                     />
                                     <span>{option.name}</span>
                                 </label>
                             ))}
-
-                            {options.length === 0 && (
-                                <div className="no-results">{t('common.noResults')}</div>
+                            {filteredOptions.length === 0 && !searchTerm && options.length > 0 && (
+                                 <div className="no-results">{t('common.noResults')}</div>
                             )}
+                             {options.length === 0 && (
+                                 <div className="no-results">{t('common.noOptions')}</div>
+                             )}
                         </div>
                     </div>
                 )}
@@ -160,75 +163,55 @@ const Select = React.memo(({
     );
 });
 
-// Modified PriceFilter component for Filters.jsx
-// Modified PriceFilter component for Filters.jsx
+
+// --- PriceFilter Component (Keep as is) ---
 const PriceFilter = React.memo(({
-                                    minPrice,
-                                    setMinPrice,
-                                    maxPrice,
-                                    setMaxPrice,
-                                    currency,
-                                    setCurrency
-                                }) => {
+    minPrice,
+    setMinPrice,
+    maxPrice,
+    setMaxPrice,
+    currency,
+    setCurrency
+}) => {
     const { t } = useContext(LanguageContext);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
-
-    // Predefined price ranges
-    const priceRanges = [
+    const priceRanges = useMemo(() => [
         { min: '5000', max: '10000' },
         { min: '10000', max: '15000' },
         { min: '15000', max: '20000' },
         { min: '20000', max: '30000' },
         { min: '30000', max: '50000' },
         { min: '50000', max: '100000' }
-    ];
+    ], []);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
-    };
+    const toggleDropdown = useCallback(() => setIsOpen(prev => !prev), []);
 
-    const handleCurrencyToggle = (newCurrency) => {
+    const handleCurrencyToggle = useCallback((newCurrency) => {
         if (newCurrency === currency) return;
-
         const exchangeRate = 2.65;
-        let newMinPrice = minPrice;
-        let newMaxPrice = maxPrice;
-
-        if (newCurrency === 'USD') {
-            // GEL to USD
-            newMinPrice = minPrice ? (Number(minPrice) / exchangeRate).toFixed(0) : '';
-            newMaxPrice = maxPrice ? (Number(maxPrice) / exchangeRate).toFixed(0) : '';
-        } else {
-            // USD to GEL
-            newMinPrice = minPrice ? (Number(minPrice) * exchangeRate).toFixed(0) : '';
-            newMaxPrice = maxPrice ? (Number(maxPrice) * exchangeRate).toFixed(0) : '';
-        }
-
-        setMinPrice(newMinPrice);
-        setMaxPrice(newMaxPrice);
+        let newMin = minPrice ? (newCurrency === 'USD' ? (Number(minPrice) / exchangeRate) : (Number(minPrice) * exchangeRate)).toFixed(0) : '';
+        let newMax = maxPrice ? (newCurrency === 'USD' ? (Number(maxPrice) / exchangeRate) : (Number(maxPrice) * exchangeRate)).toFixed(0) : '';
+        setMinPrice(newMin);
+        setMaxPrice(newMax);
         setCurrency(newCurrency);
-    };
+    }, [currency, minPrice, maxPrice, setMinPrice, setMaxPrice, setCurrency]);
 
-    const selectPriceRange = (min, max) => {
+    const selectPriceRange = useCallback((min, max) => {
         setMinPrice(min);
         setMaxPrice(max);
         setIsOpen(false);
-    };
+    }, [setMinPrice, setMaxPrice]);
 
     const currencySymbol = currency === 'GEL' ? '₾' : '$';
 
@@ -236,62 +219,32 @@ const PriceFilter = React.memo(({
         <div className="select-container">
             <label>{t('filters.price')}</label>
             <div className="custom-select" ref={dropdownRef}>
-                <div
-                    className="select-header"
-                    onClick={toggleDropdown}
-                >
+                <div className="select-header" onClick={toggleDropdown}>
                     <span>
                         {minPrice || maxPrice ?
                             `${minPrice || '0'} ${currencySymbol} - ${maxPrice || '∞'} ${currencySymbol}` :
-                            "ფასი"}
+                            t('filters.price')}
                     </span>
-                    <span className={`arrow ${isOpen ? 'open' : ''}`}>▼</span>
+                     <svg className={`arrow ${isOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6">
+                         <path fill="currentColor" d="M0 0l5 5 5-5z"/>
+                     </svg>
                 </div>
-
                 {isOpen && (
                     <div className="select-dropdown price-select-dropdown">
                         <div className="price-range-header">
                             <div className="currency-toggle">
-                                <button
-                                    className={`currency-btn ${currency === 'GEL' ? 'active' : ''}`}
-                                    onClick={() => handleCurrencyToggle('GEL')}
-                                >
-                                    ₾
-                                </button>
-                                <button
-                                    className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
-                                    onClick={() => handleCurrencyToggle('USD')}
-                                >
-                                    $
-                                </button>
+                                <button className={`currency-btn ${currency === 'GEL' ? 'active' : ''}`} onClick={() => handleCurrencyToggle('GEL')}>₾</button>
+                                <button className={`currency-btn ${currency === 'USD' ? 'active' : ''}`} onClick={() => handleCurrencyToggle('USD')}>$</button>
                             </div>
                         </div>
                         <div className="price-custom-range">
-                            <input
-                                type="number"
-                                className="price-min-input"
-                                placeholder={`${t('filters.from')} ${currencySymbol}`}
-                                value={minPrice}
-                                onChange={(e) => setMinPrice(e.target.value)}
-                                min="0"
-                            />
+                            <input type="number" className="price-min-input" placeholder={`${t('filters.from')} ${currencySymbol}`} value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min="0"/>
                             <span className="price-separator">-</span>
-                            <input
-                                type="number"
-                                className="price-max-input"
-                                placeholder={`${t('filters.to')} ${currencySymbol}`}
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(e.target.value)}
-                                min="0"
-                            />
+                            <input type="number" className="price-max-input" placeholder={`${t('filters.to')} ${currencySymbol}`} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min="0"/>
                         </div>
                         <div className="options-container">
                             {priceRanges.map((range, index) => (
-                                <div
-                                    key={index}
-                                    className="option-item price-option"
-                                    onClick={() => selectPriceRange(range.min, range.max)}
-                                >
+                                <div key={index} className="option-item price-option" onClick={() => selectPriceRange(range.min, range.max)}>
                                     <span>{range.min} {currencySymbol}</span>
                                     <span>-</span>
                                     <span>{range.max} {currencySymbol}</span>
@@ -305,30 +258,67 @@ const PriceFilter = React.memo(({
     );
 });
 
+// --- YearRangeFilter Component ---
+const YearRangeFilter = React.memo(({ minYear, setMinYear, maxYear, setMaxYear }) => {
+    const { t } = useContext(LanguageContext);
+    const currentYear = new Date().getFullYear();
+
+    const handleMinYearChange = (e) => {
+        const newMinYear = e.target.value;
+        setMinYear(newMinYear);
+        if (maxYear && Number(newMinYear) > Number(maxYear)) {
+            setMaxYear(newMinYear);
+        }
+    };
+
+    const handleMaxYearChange = (e) => {
+        const newMaxYear = e.target.value;
+        setMaxYear(newMaxYear);
+        if (minYear && Number(newMaxYear) < Number(minYear)) {
+            setMinYear(newMaxYear);
+        }
+    };
+
+    return (
+        <div className="select-container">
+            <label>{t('filters.year')}</label>
+            <div className="year-inputs">
+                <input
+                    type="number"
+                    className="year-input"
+                    placeholder={t('filters.from')}
+                    value={minYear}
+                    onChange={handleMinYearChange}
+                    min="1900"
+                    max={currentYear}
+                />
+                <span className="year-separator">-</span>
+                <input
+                    type="number"
+                    className="year-input"
+                    placeholder={t('filters.to')}
+                    value={maxYear}
+                    onChange={handleMaxYearChange}
+                    min="1900"
+                    max={currentYear}
+                />
+            </div>
+        </div>
+    );
+});
+
+// Add PropTypes for YearRangeFilter
+YearRangeFilter.propTypes = {
+    minYear: PropTypes.string,
+    setMinYear: PropTypes.func.isRequired,
+    maxYear: PropTypes.string,
+    setMaxYear: PropTypes.func.isRequired,
+};
 
 
-
-// არსებული PriceRangeInput კომპონენტს ვტოვებთ სამომავლო გამოყენებისთვის
-const PriceRangeInput = React.memo(({
-                                        value,
-                                        onChange,
-                                        placeholder,
-                                        className,
-                                        currency
-                                    }) => (
-    <input
-        type="number"
-        className={className}
-        value={value}
-        onChange={onChange}
-        placeholder={`${placeholder} ${currency === 'GEL' ? '₾' : '$'}`}
-        min="0"
-    />
-));
-
+// --- Main Filters Component ---
+// Remove saleType, setSaleType from props
 const Filters = ({
-    saleType,
-    setSaleType,
     selectedManufacturer,
     setSelectedManufacturer,
     manufacturers,
@@ -343,130 +333,128 @@ const Filters = ({
     maxPrice,
     setMaxPrice,
     currency,
-    setCurrency
+    setCurrency,
+    minYear,
+    setMinYear,
+    maxYear,
+    setMaxYear,
+    location,
+    setLocation
 }) => {
     const { t } = useContext(LanguageContext);
     const [filteredModels, setFilteredModels] = useState([]);
 
-    const categoryModelMapping = {
+    const categoryModelMapping = useMemo(() => ({
         "1": t('car.categories.sedan'),
         "2": t('car.categories.coupe'),
         "3": t('car.categories.jeep'),
         "4": t('car.categories.universal'),
-    };
+        "5": t('car.categories.hatchback'),
+        "6": t('car.categories.minivan'),
+        "7": t('car.categories.microbus'),
+        "8": t('car.categories.pickup'),
+        "9": t('car.categories.cabriolet'),
+        "10": t('car.categories.limousine')
+    }), [t]);
 
-    // განახლებული useEffect მოდელების ფილტრაციისთვის
+    // Updated useEffect for filtering models
     useEffect(() => {
-        const filterModelsByCategory = () => {
-            console.log("მოდელები:", models); // დავამატოთ ლოგი დებაგისთვის
+        const filterModels = () => {
+            console.log("--- Filtering Models ---");
+            console.log("Raw models prop:", models);
+            console.log("Selected Manufacturer(s):", selectedManufacturer);
+            console.log("Selected Category:", category);
 
-            // თუ მოდელების მასივი ცარიელია, დავაბრუნოთ ცარიელი მასივი
             if (!models || models.length === 0) {
-                console.log("მოდელები არ არის");
+                console.log("Result: Models array is empty initially.");
                 setFilteredModels([]);
                 return;
             }
 
-            // ყველა მოდელის ასლი
             let filtered = [...models];
-            console.log("ფილტრაციამდე:", filtered.length);
 
-            // კატეგორიით ფილტრაცია, თუ არჩეულია
-            if (category) {
-                filtered = filtered.filter(model => {
-                    const categoryMatch = model.category_id &&
-                        String(model.category_id) === String(category);
-                    return categoryMatch;
-                });
-                console.log("კატეგორიის შემდეგ:", filtered.length);
-            }
-
-            // მწარმოებლით ფილტრაცია, თუ არჩეულია
             if (selectedManufacturer && selectedManufacturer.length > 0) {
-                filtered = filtered.filter(model => {
-                    return selectedManufacturer.includes(String(model.manufacturer_id));
-                });
-                console.log("მწარმოებლის შემდეგ:", filtered.length);
+                filtered = filtered.filter(model =>
+                    selectedManufacturer.includes(String(model.manufacturer_id))
+                );
+                console.log(`Models after manufacturer filter (${selectedManufacturer.join(', ')}):`, filtered.length);
+            } else {
+                 console.log("No manufacturer filter applied.");
             }
 
-            // ფორმატირება UI-სთვის
-            const formattedModels = filtered.map(model => ({
-                id: model.model_id,
-                name: model.model_name,
-                manufacturer_id: model.manufacturer_id
-            }));
+            if (category) {
+                filtered = filtered.filter(model => String(model.category_id) === String(category));
+                console.log(`Models after category filter (${category}):`, filtered.length);
+            } else {
+                 console.log("No category filter applied.");
+            }
 
-            console.log("საბოლოო მოდელები:", formattedModels.length);
-            setFilteredModels(formattedModels);
+            let formatted = [];
+            if (filtered.length > 0) {
+                formatted = filtered.map(model => ({
+                    id: String(model.model_id),
+                    name: model.model_name,
+                    manufacturer_id: model.manufacturer_id,
+                    category_id: model.category_id
+                }));
+                formatted = Array.from(new Map(formatted.map(item => [item.id, item])).values());
+            }
+
+            console.log("Result: Final unique formatted models:", formatted.length);
+            setFilteredModels(formatted);
         };
 
-        filterModelsByCategory();
+        filterModels();
     }, [models, category, selectedManufacturer]);
 
 
-    const saleTypeOptions = useMemo(() => [
-        {id: "1", name: t('filters.forSale')},
-        {id: "2", name: t('filters.forRent')}
-    ], [t]);
+    // Remove saleTypeOptions
 
     const manufacturerOptions = useMemo(() =>
-            manufacturers.map(brand => ({
-                id: brand.man_id,
-                name: brand.man_name
-            })),
+        manufacturers.map(brand => ({
+            id: String(brand.man_id),
+            name: brand.man_name
+        })).sort((a, b) => a.name.localeCompare(b.name)),
         [manufacturers]
     );
 
     const categoryOptions = useMemo(() =>
-            Array.isArray(categories) ? categories.map(cat => ({
-                id: cat.category_id,
-                name: categoryModelMapping[cat.category_id] || cat.title
-            })) : [],
-        [categories, categoryModelMapping]
+        Array.isArray(categories) ? categories.map(cat => ({
+            id: String(cat.category_id),
+            name: categoryModelMapping[cat.category_id] || cat.title || t('car.categories.other')
+        })).sort((a, b) => a.name.localeCompare(b.name)) : [],
+        [categories, categoryModelMapping, t]
     );
 
-    const handleSaleTypeChange = useCallback((e) => {
-        setSaleType(e.target.value);
-    }, [setSaleType]);
+     const locationOptions = useMemo(() => [
+        { id: "0", name: t('car.location.tbilisi') },
+        { id: "2", name: t('car.location.rustavi') },
+        { id: "1", name: t('car.location.kutaisi') },
+        { id: "3", name: t('car.location.batumi') },
+        { id: "4", name: t('car.location.poti') },
+    ].sort((a, b) => a.name.localeCompare(b.name)), [t]);
+
+
+    // Remove handleSaleTypeChange
 
     const handleManufacturerChange = useCallback((e) => {
-        const newManufacturers = e.target.value;
-        setSelectedManufacturer(newManufacturers);
-
-        // გავასუფთაოთ არჩეული მოდელი როცა მწარმოებელი იცვლება
+        setSelectedManufacturer(e.target.value);
         setSelectedModel("");
     }, [setSelectedManufacturer, setSelectedModel]);
 
     const handleCategoryChange = useCallback((e) => {
-        const newCategory = e.target.value;
-        setCategory(newCategory);
+        setCategory(e.target.value);
         setSelectedModel("");
     }, [setCategory, setSelectedModel]);
 
-    const handleModelChange = useCallback((e) => {
-        setSelectedModel(e.target.value);
-    }, [setSelectedModel]);
+    const handleModelChange = useCallback((e) => setSelectedModel(e.target.value), [setSelectedModel]);
+
+    const handleLocationChange = useCallback((e) => setLocation(e.target.value), [setLocation]);
+
 
     return (
         <div className="properties">
-            {/* All selects in a flat structure - CSS will position them */}
-            <PriceFilter
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
-                currency={currency}
-                setCurrency={setCurrency}
-            />
-
-            <Select
-                label={t('filters.dealType')}
-                value={saleType}
-                onChange={handleSaleTypeChange}
-                options={saleTypeOptions}
-                defaultOption={t('filters.selectDealType')}
-            />
-
+            {/* Row 1: Manufacturer, Price, Category */}
             <Select
                 label={t('filters.manufacturer')}
                 value={selectedManufacturer}
@@ -475,7 +463,14 @@ const Filters = ({
                 defaultOption={t('filters.allManufacturers')}
                 isMultiSelect={true}
             />
-
+            <PriceFilter
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                currency={currency}
+                setCurrency={setCurrency}
+            />
             <Select
                 label={t('filters.category')}
                 value={category}
@@ -484,24 +479,36 @@ const Filters = ({
                 defaultOption={t('filters.allCategories')}
             />
 
+            {/* Row 2: Model, Year, Location */}
             <Select
                 label={t('filters.model')}
                 value={selectedModel}
                 onChange={handleModelChange}
                 options={filteredModels}
-                disabled={false}
+                // Keep disabled logic or remove if needed
+                disabled={!selectedManufacturer || selectedManufacturer.length === 0 || filteredModels.length === 0}
                 defaultOption={t('filters.allModels')}
             />
+            <YearRangeFilter
+                minYear={minYear}
+                setMinYear={setMinYear}
+                maxYear={maxYear}
+                setMaxYear={setMaxYear}
+            />
+            <Select
+                label={t('filters.location')}
+                value={location}
+                onChange={handleLocationChange}
+                options={locationOptions}
+                defaultOption={t('filters.allLocations')}
+             />
         </div>
     );
 };
 
-
-
-// PropTypes დეფინიციები (უცვლელი)
+// --- PropTypes ---
+// Remove saleType, setSaleType from Filters.propTypes
 Filters.propTypes = {
-    saleType: PropTypes.string.isRequired,
-    setSaleType: PropTypes.func.isRequired,
     selectedManufacturer: PropTypes.arrayOf(PropTypes.string).isRequired,
     setSelectedManufacturer: PropTypes.func.isRequired,
     manufacturers: PropTypes.arrayOf(
@@ -515,7 +522,7 @@ Filters.propTypes = {
     categories: PropTypes.arrayOf(
         PropTypes.shape({
             category_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-            title: PropTypes.string.isRequired,
+            title: PropTypes.string,
         })
     ).isRequired,
     models: PropTypes.arrayOf(
@@ -523,7 +530,7 @@ Filters.propTypes = {
             model_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
             model_name: PropTypes.string.isRequired,
             manufacturer_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-            category_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+            category_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         })
     ).isRequired,
     selectedModel: PropTypes.string.isRequired,
@@ -534,9 +541,15 @@ Filters.propTypes = {
     setMaxPrice: PropTypes.func.isRequired,
     currency: PropTypes.oneOf(['GEL', 'USD']).isRequired,
     setCurrency: PropTypes.func.isRequired,
+    minYear: PropTypes.string,
+    setMinYear: PropTypes.func.isRequired,
+    maxYear: PropTypes.string,
+    setMaxYear: PropTypes.func.isRequired,
+    location: PropTypes.string,
+    setLocation: PropTypes.func.isRequired,
 };
 
-// დავამატოთ ახალი PriceFilter კომპონენტისთვის PropTypes
+// PriceFilter PropTypes (Keep as is)
 PriceFilter.propTypes = {
     minPrice: PropTypes.string,
     setMinPrice: PropTypes.func.isRequired,
@@ -546,6 +559,7 @@ PriceFilter.propTypes = {
     setCurrency: PropTypes.func.isRequired,
 };
 
+// Select PropTypes (Keep as is)
 Select.propTypes = {
     label: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
@@ -564,12 +578,9 @@ Select.propTypes = {
     isMultiSelect: PropTypes.bool
 };
 
-PriceRangeInput.propTypes = {
-    value: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
-    placeholder: PropTypes.string,
-    className: PropTypes.string,
-    currency: PropTypes.oneOf(['GEL', 'USD']).isRequired,
-};
+// REMOVE PriceRangeInput PropTypes
+/*
+PriceRangeInput.propTypes = { ... };
+*/
 
 export default React.memo(Filters);
